@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Accessible Math Reader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Accessible Math Reader</h1>
+            <p>Convert LaTeX/MathML expressions to Speech & Braille</p>
+        </header>
+
+        <form action="/convert" method="POST" class="form-box">
+            <label for="math_input">Enter LaTeX or MathML:</label>
+            <textarea id="math_input" name="math_input" rows="6" placeholder="e.g. \frac{a+b}{c}" required>{{ input_text or '' }}</textarea>
+            <button type="submit" class="btn">Convert</button>
+        </form>
+
+        {% if braille_output %}
+        <section class="output-section">
+            <h2>🎧 Speech Output</h2>
+            <audio controls>
+                <source src="/audio/{{ audio_file }}" type="audio/mpeg">
+                Your browser does not support audio playback.
+            </audio>
+
+            <h2>⠿ Braille Output</h2>
+            <div class="braille-box">{{ braille_output }}</div>
+        </section>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>© 2025 Accessible Math Reader | Prototype v0.2</p>
+    </footer>
+</body>
+</html>
