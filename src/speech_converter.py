@@ -1,12 +1,30 @@
 from gtts import gTTS
-import os, time
 
-def text_to_speech(text: str) -> str:
-    """Convert text to speech and save as MP3."""
-    output_dir = "static/audio"
-    os.makedirs(output_dir, exist_ok=True)
-    filename = f"output_{int(time.time())}.mp3"
-    filepath = os.path.join(output_dir, filename)
-    tts = gTTS(text=text, lang='en')
-    tts.save(filepath)
-    return filepath
+def generate_ssml(text):
+    """
+    Generate SSML markup to make math speech more expressive.
+    """
+    ssml = f"""
+    <speak>
+        <prosody rate="medium" pitch="medium">
+            {text}
+        </prosody>
+    </speak>
+    """
+    return ssml.strip()
+
+def text_to_speech(text, output_path="static/audio/output.mp3"):
+    """
+    Convert text (or SSML fallback) into speech using gTTS.
+    """
+    ssml = generate_ssml(text)
+
+    # Fallback since gTTS doesn't support SSML directly
+    tts = gTTS(text=text, lang="en")
+    tts.save(output_path)
+
+    # Optionally, write SSML version for engines that support it
+    with open(output_path.replace(".mp3", ".ssml"), "w", encoding="utf-8") as f:
+        f.write(ssml)
+
+    return output_path

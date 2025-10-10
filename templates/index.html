@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Accessible Math Reader</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- 1. Add MathJax Script for rendering formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <div class="container">
@@ -14,26 +16,40 @@
 
         <form action="/convert" method="POST" class="form-box">
             <label for="math_input">Enter LaTeX or MathML:</label>
-            <textarea id="math_input" name="math_input" rows="6" placeholder="e.g. \frac{a+b}{c}" required>{{ input_text or '' }}</textarea>
+            <textarea id="math_input" name="math_input" rows="6" placeholder="e.g. \frac{a^2}{b_i}" required>{{ input_text or '' }}</textarea>
             <button type="submit" class="btn">Convert</button>
         </form>
 
-        {% if braille_output %}
+        {% if readable_text %}
         <section class="output-section">
+            <!-- 2. Add a new section to display the rendered formula -->
+            <h2>🔬 Rendered Formula</h2>
+            <div class="rendered-math-box">
+                {# This block renders the original input using MathJax. #}
+                {# We use the 'safe' filter for MathML to prevent HTML escaping. #}
+                {% if input_text and input_text.strip().startswith('<math') %}
+                    {{ input_text | safe }}
+                {% else %}
+                    {# For LaTeX, we wrap it in delimiters that MathJax recognizes. #}
+                    $${{ input_text }}$$
+                {% endif %}
+            </div>
+
             <h2>🎧 Speech Output</h2>
             <audio controls>
-                <source src="/audio/{{ audio_file }}" type="audio/mpeg">
+                <source src="{{ url_for('static', filename='audio/' + audio_file) }}" type="audio/mpeg">
                 Your browser does not support audio playback.
             </audio>
 
             <h2>⠿ Braille Output</h2>
-            <div class="braille-box">{{ braille_output }}</div>
+            {# Make sure you are using the braille_text variable from our previous fix! #}
+            <div class="braille-box">{{ braille_text }}</div>
         </section>
         {% endif %}
     </div>
 
     <footer>
-        <p>© 2025 Accessible Math Reader | Prototype v0.2</p>
+        <p>© 2025 Accessible Math Reader | Prototype v0.3</p>
     </footer>
 </body>
 </html>
