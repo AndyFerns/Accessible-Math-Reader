@@ -78,6 +78,10 @@ def parse_latex(latex_str):
         (r'\\sum', 'summation of'),
         (r'\\int', 'integral of'),
     ]
+    # Iteratively apply replacements
+    for pattern, repl in structural_replacements:
+        text = re.sub(pattern, repl, text)
+    # Re-run for nested cases (e.g., \frac{a^2}{b})
     for pattern, repl in structural_replacements:
         text = re.sub(pattern, repl, text)
 
@@ -97,9 +101,49 @@ def parse_latex(latex_str):
     return ' '.join(text.split())
 
 
+# --- NEW FUNCTION ---
+def latex_to_braille_simple(latex_str):
+    """
+    Convert LaTeX to a simple char string that braille_converter.py can understand.
+    Example: \frac{a}{b} -> (a)/(b)
+    Example: a^2 -> a2
+    Example: b_i -> bi
+    """
+    if latex_str.strip().startswith("<math"):
+        # This is a simple fallback for MathML. A proper solution
+        # would be a full MathML to simple text converter.
+        return "MathML(Braille-TBD)"
+        
+    text = latex_str.strip()
+    
+    # Simple replacements that map to BRAILLE_MAP
+    replacements = [
+        # Fractions
+        (r'\\frac{(.+?)}{(.+?)}', r'(\1)/(\2)'),
+        # Exponents: a^2 -> a2, a^{10} -> a10
+        (r'([a-zA-Z0-9]+)\^\{?(.+?)\}?', r'\1\2'),
+        # Subscripts: b_i -> bi, b_{10} -> b10
+        (r'([a-zA-Z0-9]+)_\{?(.+?)\}?', r'\1\2'),
+        # Symbols
+        (r'\\pm', '+'), # Simplified from +-
+        (r'\\times', '*'),
+        (r'\\cdot', '*'),
+        (r'\\div', '/'),
+        # Remove symbols not in braille map
+        (r'[$]', ''), (r'[\\{}]', ''),
+        (r'\\sqrt', ''), # No good braille map for 'sqrt'
+    ]
+    
+    for pattern, repl in replacements:
+        text = re.sub(pattern, repl, text)
+    
+    # Remove any remaining whitespace
+    return text.replace(' ', '')
+
+
 def parse_math_input(math_str):
     """
-    Detect whether input is LaTeX or MathML and return readable text.
+    Detect whether input is LaTeX or MathML and return readable text for SPEECH.
     """
     if math_str.strip().startswith("<math"):
         return parse_mathml(math_str)

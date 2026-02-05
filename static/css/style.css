@@ -23,18 +23,41 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-.container {
-    max-width: 700px;
-    margin: 40px auto;
+/* * NEW: Two-column grid layout
+ * This is the main container for the two panes.
+*/
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr; /* Mobile-first: single column */
+    gap: 30px;
+    max-width: 1400px;
+    margin: 20px auto;
+}
+
+/* On screens 900px and wider, switch to two columns */
+@media (min-width: 900px) {
+    .main-layout {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* * MODIFIED: Renamed .container to .pane
+ * This style now applies to both the left and right panes.
+*/
+.pane {
     background-color: var(--card-bg);
     padding: 40px;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
-    transition: all 0.3s ease;
+    /* Make panes at least a certain height */
+    min-height: 300px; 
+    /* Ensure panes can grow if content is tall */
+    height: fit-content;
 }
 
 header {
-    text-align: center;
+    /* MODIFIED: Changed from center-align to left-align */
+    text-align: left;
     margin-bottom: 40px;
 }
 
@@ -101,23 +124,43 @@ textarea:focus {
 }
 
 .output-section {
-    margin-top: 40px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 40px;
+    /* MODIFIED: Removed top margin/border as .pane provides separation */
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
 }
 
 .output-section h2 {
     font-size: 1.5rem;
     font-weight: 700;
+    margin-top: 20px; /* Add margin-top for spacing between sections */
     margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 10px;
+    border-bottom: 1px solid var(--border-color); /* Add a light separator */
+    padding-bottom: 10px;
+}
+
+/* First h2 in the section needs no top margin */
+.output-section h2:first-of-type {
+    margin-top: 0;
+}
+
+/* NEW: Style for the rendered math box */
+.rendered-math-box {
+    background-color: #fdfdff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    font-size: 1.1rem;
 }
 
 audio {
     width: 100%;
-    margin-bottom: 30px;
+    margin-top: 10px; /* Added margin for spacing */
+    margin-bottom: 10px; /* Reduced margin */
 }
 
 .braille-box {
@@ -130,11 +173,42 @@ audio {
     letter-spacing: 5px;
     word-wrap: break-word;
     line-height: 1.5;
+    overflow-x: auto; /* Added for long unwrappable lines */
 }
+
+/* NEW: Styles for the placeholder box in the right pane */
+.placeholder-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    min-height: 300px; /* Ensure it has some height */
+    color: var(--text-light);
+}
+
+.placeholder-icon {
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.placeholder-box h3 {
+    color: var(--text-dark);
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.placeholder-box p {
+    max-width: 80%;
+    margin: 0;
+}
+
 
 footer {
     text-align: center;
-    margin-top: 50px;
+    margin-top: 30px; /* Reduced top margin */
+    margin-bottom: 20px;
     color: var(--text-light);
     font-size: 0.9rem;
 }

@@ -2,54 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accessible Math Reader</title>
+    
+    <!-- 1. Link to the CSS file served by Flask -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- 1. Add MathJax Script for rendering formulas -->
+
+    <!-- 2. Add MathJax Script for rendering formulas -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Accessible Math Reader</h1>
-            <p>Convert LaTeX/MathML expressions to Speech & Braille</p>
-        </header>
 
-        <form action="/convert" method="POST" class="form-box">
-            <label for="math_input">Enter LaTeX or MathML:</label>
-            <textarea id="math_input" name="math_input" rows="6" placeholder="e.g. \frac{a^2}{b_i}" required>{{ input_text or '' }}</textarea>
-            <button type="submit" class="btn">Convert</button>
-        </form>
+    <!-- This div wraps the entire two-column layout -->
+    <div class="main-layout">
 
-        {% if readable_text %}
-        <section class="output-section">
-            <!-- 2. Add a new section to display the rendered formula -->
-            <h2>🔬 Rendered Formula</h2>
-            <div class="rendered-math-box">
-                {# This block renders the original input using MathJax. #}
-                {# We use the 'safe' filter for MathML to prevent HTML escaping. #}
-                {% if input_text and input_text.strip().startswith('<math') %}
-                    {{ input_text | safe }}
-                {% else %}
-                    {# For LaTeX, we wrap it in delimiters that MathJax recognizes. #}
-                    $${{ input_text }}$$
-                {% endif %}
+        <!-- Left Pane: Input -->
+        <div class="pane input-pane">
+            <header>
+                <h1>Accessible Math Reader</h1>
+                <p>Convert LaTeX/MathML expressions to Speech & Braille</p>
+            </header>
+
+            <!-- This form submits the input to your Flask /convert endpoint -->
+            <form action="/convert" method="POST" class="form-box">
+                <label for="math_input">Enter LaTeX or MathML:</label>
+                <!-- The textarea is populated with the input_text from the server -->
+                <textarea id="math_input" name="math_input" rows="8" placeholder="e.g. \frac{a^2}{b_i}" required>{{ input_text or '' }}</textarea>
+                <button type="submit" class="btn">Convert</button>
+            </form>
+        </div>
+
+        <!-- Right Pane: Output -->
+        <div class="pane output-pane">
+            <!-- This section only appears if the server returns results -->
+            {% if readable_text %}
+            <section class="output-section">
+                
+                <!-- 1. Rendered Formula Display -->
+                <h2>🔬 Rendered Formula</h2>
+                <div class="rendered-math-box">
+                    {# This block renders the original input using MathJax. #}
+                    {# We use the 'safe' filter for MathML to prevent HTML escaping. #}
+                    {% if input_text and input_text.strip().startswith('<math') %}
+                        {{ input_text | safe }}
+                    {% else %}
+                        {# For LaTeX, we wrap it in delimiters that MathJax recognizes. #}
+                        $${{ input_text }}$$
+                    {% endif %}
+                </div>
+
+                <!-- 2. Speech Output Player -->
+                <h2>🎧 Speech Output</h2>
+                <audio controls>
+                    <!-- Uses url_for to find the correct audio file path -->
+                    <source src="{{ url_for('static', filename='audio/' + audio_file) }}" type="audio/mpeg">
+                    Your browser does not support audio playback.
+                </audio>
+
+                <!-- 3. Braille Output Display -->
+                <h2>⠿ Braille Output</h2>
+                <!-- Displays the braille_text variable from the server -->
+                <div class="braille-box">{{ braille_text }}</div>
+
+            </section>
+            <!-- Show a placeholder if no results have been returned yet -->
+            {% else %}
+            <div class="placeholder-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="placeholder-icon" viewBox="0 0 16 16">
+                    <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.234-.124 2.503.12 3.61.635.555.256 1.04.64 1.468 1.068.428.428.77.913 1.068 1.468.515 1.107.759 2.376.635 3.61-.124 1.234-.523 2.503-.893 3.388-.37.885-.769 2.154-.893 3.388-.124 1.234.12 2.503.635 3.61.256.555.64 1.04 1.068 1.468.428.428.913.77 1.468 1.068 1.107.515 2.376.759 3.61.635 1.234-.124 2.503-.523 3.388-.893.885-.37 2.154-.769 3.388-.893 1.234-.124 2.503.12 3.61.635.555.256 1.04.64 1.468 1.068.428.428.77.913 1.068 1.468.515 1.107.759 2.376.635 3.61.124-1.234.523-2.503.893-3.388.37-.885.769-2.154.893-3.388.124-1.234-.12-2.503-.635-3.61-.256-.555-.64-1.04-1.068-1.468-.428-.428-.913-.77-1.468-1.068-1.107-.515-2.376-.759-3.61-.635-1.234.124-2.503.523-3.388.893-.885.37-2.154.769-3.388.893-1.234.124-2.503-.12-3.61-.635-.555-.256-1.04-.64-1.468-1.068-.428-.428-.77-.913-1.068-1.468-.515-1.107-.759-2.376-.635-3.61-.124 1.234-.523 2.503-.893 3.388-.37.885-.769 2.154-.893 3.388-.124 1.234.12 2.503.635 3.61.256.555.64 1.04 1.068 1.468.428.428.913.77 1.468 1.068 1.107.515 2.376.759 3.61.635 1.234-.124 2.503-.523 3.388-.893.885-.37 2.154-.769 3.388-.893 1.234-.124 2.503.12 3.61.635.555.256 1.04.64 1.468 1.068.428.428.77.913 1.068 1.468.515 1.107.759 2.376.635 3.61.124-1.234.523-2.503.893-3.388.37-.885.769-2.154.893-3.388.124-1.234-.12-2.503-.635-3.61-.256-.555-.64-1.04-1.068-1.468-.428-.428-.913-.77-1.468-1.068-1.107-.515-2.376-.759-3.61-.635C9.939 3.65 8.669 4.049 7.78 4.418c-.885.37-2.154.769-3.388.893-1.234.124-2.503-.12-3.61-.635C.227 4.12.02 3.555 0 2.828z"/>
+                    <path d="M6.664 1.842c.23.23.453.468.666.71.213.242.417.49.61.745.194.256.378.52.55.79.173.27.336.548.487.833.15.286.29.58.418.88.127.302.24.61.34.925.1.316.186.638.26 965.073.328.14.66.267.998.08.337.073.68.12 1.028.15.348.03.702.043 1.06.043s.712-.013 1.06-.043c.348-.03.69-.077 1.028-.15.337-.08.66-.187.998-.26.328-.074.65-.16.965-.26.315-.1.623-.213.925-.34.3-.128.595-.268.88-.418.284-.15.562-.313.833-.487.27-.172.535-.356.79-.55.254-.193.502-.397.745-.61.242-.213.48-.44.71-.666.23-.23.468-.453.71-.666.242-.213.49-.417.745-.61.256-.194.52-.378.79-.55.27-.173.548-.336.833-.487.286-.15.58-.29.88-.418.302-.127.61-.24.925-.34.316-.1.638-.186.965-.26.328-.073.66-.14.998-.21.337-.074.68-.12 1.028-.15C13.487.812 13.841.8 14.2.8s.712.012 1.06.04c.348.03.69.076 1.028.15.337.073.66.136.998.21.328.074.65.16.965.26.315.1.623.213.925.34.3.128.595.268.88.418.284.15.562.313.833.487.27.172.535.356.79.55.254-.193.502-.397.745-.61.242-.213.48-.44.71-.666a4.412 4.412 0 0 0-1.076-1.076A4.412 4.412 0 0 0 14.2 0a4.412 4.412 0 0 0-3.056 1.076A4.412 4.412 0 0 0 8.088 0a4.412 4.412 0 0 0-3.056 1.076A4.412 4.412 0 0 0 1.976 0a4.412 4.412 0 0 0-1.076 1.076A4.412 4.412 0 0 0 0 2.828c0 .358.012.712.04 1.06.03.348.076.69.15 1.028.073.337.136.66.21.998.074.328.16.65.26.965.1.315.213.623.34.925.128.3.268.595.418.88.15.284.313.562.487.833.172.27.356.535.55.79.193.254.397.502.61.745.213.242.44.48.666.71.23.23.453.468.666.71.213.242.417.49.61.745.194.256.378.52.55.79.173.27.336.548.487.833.15.286.29.58.418.88.127.302.24.61.34.925.1.316.186.638.26.965.073.328.14.66.21.998.074.337.12.68.15 1.028.03.348.043.702.043 1.06s-.013.712-.043 1.06c-.03.348-.077.69-.15 1.028-.07.337-.136.66-.21.998-.074.328-.16.65-.26.965-.1.315-.213.623-.34.925-.128.3-.268.595-.418.88-.15.284-.313.562-.487.833-.172.27-.356.535-.55.79-.193.254-.397.502-.61.745-.213.242-.44.48-.666.71-.23.23-.453.468-.666.71-.213.242-.417.49-.61.745-.194.256-.378.52-.55.79-.173.27-.336.548-.487.833-.15.286-.29.58-.418.88-.127.302-.24.61-.34.925-.1.316-.186.638-.26.965-.073.328-.14.66-.21.998-.074.337-.12.68-.15 1.028-.03.348-.043.702-.043 1.06s.013.712.043 1.06c.03.348.077.69.15 1.028.07.337.136.66.21.998.074.328.16.65.26.965.1.315.213.623.34.925.128.3.268.595.418.88.15.284.313.562.487.833.172.27.356.535.55.79.193.254.397.502.61.745.213.242.44.48.666.71.23.23.453.468.666.71a4.412 4.412 0 0 0 1.076 1.076A4.412 4.412 0 0 0 8 16a4.412 4.412 0 0 0 3.056-1.076A4.412 4.412 0 0 0 14.112 16a4.412 4.412 0 0 0 3.056-1.076A4.412 4.412 0 0 0 20.224 16a4.412 4.412 0 0 0 1.076-1.076A4.412 4.412 0 0 0 21.658 13.172a4.412 4.412 0 0 0-.04-1.06c-.03-.348-.076-.69-.15-1.028-.073-.337-.136-.66-.21-.998-.074-.328-.16-.65-.26-.965-.1-.315-.213-.623-.34-.925-.128-.3-.268-.595-.418-.88-.15-.284-.313-.562-.487-.833-.172-.27-.356-.535-.55-.79-.193-.254-.397-.502-.61-.745-.213-.242-.44-.48-.666-.71-.23-.23-.453-.468-.666-.71-.213-.242-.417-.49-.61-.745-.194-.256-.378-.52-.55-.79-.173-.27-.336-.548-.487-.833-.15-.286-.29-.58-.418-.88-.127-.302-.24-.61-.34-.925-.1-.316-.186-.638-.26-.965-.073-.328-.14-.66-.21-.998-.074-.337-.12-.68-.15-1.028a4.412 4.412 0 0 0-.043-1.06c0-.358.013-.712.043-1.06.03-.348.077-.69.15-1.028.07-.337.136-.66.21-.998.074-.328.16.65.26.965.1.315.213.623.34.925.128.3.268.595.418.88.15.284.313.562.487.833.172.27.356.535.55.79.193.254.397.502.61.745.213.242.44.48.666.71.23.23.453.468.666.71a4.412 4.412 0 0 0 1.076-1.076A4.412 4.412 0 0 0 16 8a4.412 4.412 0 0 0-1.076-3.056A4.412 4.412 0 0 0 11.87 3.87a4.412 4.412 0 0 0-1.06.04c-.348.03-.69.076-1.028.15-.337.073-.66.136-.998.21-.328.074-.65.16-.965.26-.315.1-.623.213-.925.34-.3.128-.595.268-.88.418-.284.15-.562.313-.833.487-.27.172-.535.356-.79.55-.254-.193-.502-.397-.745-.61-.242-.213-.48-.44-.71-.666A4.412 4.412 0 0 0 6.664 1.842z"/>
+                </svg>
+                <h3>Your results will appear here...</h3>
+                <p>Enter a LaTeX or MathML expression in the panel on the left and click "Convert" to see the output.</p>
             </div>
+            {% endif %}
+        </div>
 
-            <h2>🎧 Speech Output</h2>
-            <audio controls>
-                <source src="{{ url_for('static', filename='audio/' + audio_file) }}" type="audio/mpeg">
-                Your browser does not support audio playback.
-            </audio>
-
-            <h2>⠿ Braille Output</h2>
-            {# Make sure you are using the braille_text variable from our previous fix! #}
-            <div class="braille-box">{{ braille_text }}</div>
-        </section>
-        {% endif %}
-    </div>
+    </div> <!-- end .main-layout -->
 
     <footer>
-        <p>© 2025 Accessible Math Reader | Prototype v0.3</p>
+        <p>© 2025 Accessible Math Reader | Flask Edition</p>
     </footer>
 </body>
 </html>
