@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "accessible-math-reader"
+version = "0.1.0"
+description = "Screen-reader-first math accessibility toolkit for converting LaTeX/MathML to speech and Braille"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Accessible Math Reader Contributors"}
+]
+keywords = ["accessibility", "math", "braille", "screen-reader", "mathml", "latex"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Accessibility",
+]
+dependencies = [
+    "gtts>=2.5.0",
+    "lxml>=4.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "axe-playwright-python>=0.1.0",
+    "playwright>=1.40.0",
+    "ruff>=0.1.0",
+]
+web = [
+    "flask>=3.0.0",
+]
+
+[project.scripts]
+amr = "accessible_math_reader.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/accessible-math-reader/accessible-math-reader"
+Documentation = "https://github.com/accessible-math-reader/accessible-math-reader#readme"
+Repository = "https://github.com/accessible-math-reader/accessible-math-reader"
+Issues = "https://github.com/accessible-math-reader/accessible-math-reader/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["accessible_math_reader"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "D", "UP", "ANN", "B", "A", "C4", "RET", "SIM"]
+ignore = ["ANN101", "ANN102", "D100", "D104"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=accessible_math_reader --cov-report=term-missing"
