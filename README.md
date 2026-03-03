@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">♿ Accessible Math Reader</h1>
   <p align="center">
-    <strong>A screen-reader-first mathematical accessibility toolkit for converting LaTeX and MathML into speech, Braille, and navigable ARIA structures.</strong>
+    <strong>A screen-reader-first mathematical accessibility toolkit for converting LaTeX, MathML, and plaintext/Unicode math into speech, Braille, and navigable ARIA structures.</strong>
   </p>
 </p>
 
@@ -25,7 +25,7 @@
 
 ## 📖 Overview
 
-**Accessible Math Reader (AMR)** is a Python package and web application that makes mathematical notation accessible to visually impaired users. It parses LaTeX and MathML expressions and converts them into:
+**Accessible Math Reader (AMR)** is a Python package and web application that makes mathematical notation accessible to visually impaired users. It parses LaTeX, MathML, and plaintext/Unicode math expressions and converts them into:
 
 - **Natural language speech** with configurable verbosity (verbose, concise, superbrief)
 - **Braille notation** in both Nemeth (US standard) and UEB (international standard)
@@ -40,7 +40,7 @@ AMR can be used as a **Python library**, a **CLI tool**, or through a **Flask-ba
 
 | Category | Highlights |
 |---|---|
-| **📖 Multi-Format Input** | Parse LaTeX and MathML mathematical expressions with auto-detection |
+| **📖 Multi-Format Input** | Parse LaTeX, MathML, and plaintext/Unicode math expressions with auto-detection |
 | **🔊 Speech Output** | Natural language descriptions with 3 verbosity levels and SSML support |
 | **⠿ Braille Support** | Full Nemeth Braille Code and Unified English Braille (UEB) converters |
 | **♿ ARIA Navigation** | Keyboard-accessible, step-by-step expression exploration with 3 navigation modes |
@@ -65,6 +65,7 @@ AMR can be used as a **Python library**, a **CLI tool**, or through a **Flask-ba
 │  │  Parser  │──▸│ Semantic AST │──▸│        Renderers           │  │
 │  │  LaTeX   │   │ (SemanticNode│   │  ┌─────────┬────────────┐  │  │
 │  │  MathML  │   │  NodeType)   │   │  │ Speech  │  Braille   │  │  │
+│  │ Plaintext│
 │  └──────────┘   └──────┬───────┘   │  │ Engine  │ Nemeth/UEB │  │  │
 │                        │           │  └─────────┴────────────┘  │  │
 │                        ▼           │  ┌─────────┬────────────┐  │  │
@@ -89,7 +90,7 @@ accessible-math-reader/
 │   ├── cli.py                    #    CLI entry point (`amr` command)
 │   ├── config.py                 #    Configuration management (env, file, API)
 │   ├── core/                     #    Core parsing & rendering engine
-│   │   ├── parser.py             #      LaTeX / MathML → Semantic AST
+│   │   ├── parser.py             #      LaTeX / MathML / Plaintext → Semantic AST
 │   │   ├── semantic.py           #      SemanticNode, NodeType, MathNavigator
 │   │   ├── renderer.py           #      Base rendering infrastructure
 │   │   ├── aria_navigator.py     #      ARIA-enhanced keyboard navigation
@@ -203,6 +204,11 @@ ssml = reader.to_ssml(r"\sqrt{x}")
 
 # ── Semantic tree inspection ────────────────────────
 structure = reader.get_structure(r"\frac{a+b}{c}")
+
+# ── Plaintext / Unicode math ────────────────────────
+speech = reader.to_speech("x² + y² = z²")
+speech = reader.to_speech("(a+b)/(c-d)")
+speech = reader.to_speech("sqrt(x) + π")
 ```
 
 #### Changing Verbosity
@@ -255,6 +261,11 @@ After installing the package, the `amr` command is available system-wide.
 ```bash
 # Speech output (default)
 amr "\frac{a^2 + b^2}{c}"
+
+# Plaintext / Unicode math
+amr "x² + y² = z²"
+amr "(a+b)/(c-d)"
+amr "sqrt(x) + π"
 
 # Braille output (Nemeth)
 amr --braille "\frac{a}{b}"
@@ -314,7 +325,7 @@ python app.py
 ```
 
 **Web UI Features:**
-- LaTeX / MathML input with live conversion
+- LaTeX / MathML / plaintext/Unicode input with live conversion
 - Tabbed output: Formula preview, Speech text, Braille, Accessible ARIA view
 - Multi-format clipboard (copy as LaTeX, plain text, or Braille)
 - Dark / Light / High-Contrast themes

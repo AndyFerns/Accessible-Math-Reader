@@ -7,7 +7,7 @@
 ## Table of Contents
 
 - [MathReader](#mathreader) - High-level API
-- [MathParser](#mathparser) - Parsing LaTeX/MathML
+- [MathParser](#mathparser) - Parsing LaTeX/MathML/Plaintext
 - [SemanticNode](#semanticnode) - Abstract Syntax Tree
 - [SpeechEngine](#speechengine) - Text-to-Speech
 - [NemethConverter](#nemethconverter) - Nemeth Braille
@@ -107,7 +107,63 @@ reader.set_verbosity("concise")
 
 ## MathParser
 
-Low-level parser for LaTeX and MathML input.
+Low-level parser for LaTeX, MathML, and plaintext/Unicode input.
+
+### Import
+
+```python
+from accessible_math_reader import MathParser
+from accessible_math_reader.core.parser import ParseError
+```
+
+### Methods
+
+#### `parse(input_str: str) → SemanticNode`
+
+Auto-detect input format and parse.
+
+```python
+parser = MathParser()
+
+# LaTeX (auto-detected)
+tree = parser.parse(r"\sqrt{x}")
+
+# MathML (auto-detected)
+tree = parser.parse('<math><mi>x</mi></math>')
+
+# Plaintext (auto-detected)
+tree = parser.parse("x² + y² = z²")
+tree = parser.parse("(a+b)/(c-d)")
+```
+
+#### `parse_latex(latex: str) → SemanticNode`
+
+Parse LaTeX string specifically.
+
+```python
+tree = parser.parse_latex(r"\int_0^\infty e^{-x} dx")
+```
+
+#### `parse_mathml(mathml: str) → SemanticNode`
+
+Parse MathML string specifically.
+
+```python
+mathml = '<math><mfrac><mi>a</mi><mi>b</mi></mfrac></math>'
+tree = parser.parse_mathml(mathml)
+```
+
+#### `parse_plaintext(text: str) → SemanticNode`
+
+Parse a plaintext / Unicode math string specifically.
+
+Handles: `a/b`, `x^2`, `x**2`, `x²`, `x₁`, `sqrt(x)`, `√x`,
+Unicode Greek (`π α Σ`), Unicode operators (`× ÷ ± ≤ ≥ ≠`),
+and named functions (`sin`, `cos`, `log`, etc.).
+
+```python
+tree = parser.parse_plaintext("sqrt(x² + y²) + π")
+```
 
 ### Import
 

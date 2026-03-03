@@ -4,6 +4,52 @@
 
 ---
 
+## Plaintext & Unicode Math Input
+
+### Everyday Notation
+
+```python
+from accessible_math_reader import MathReader
+
+reader = MathReader()
+
+# Fractions using parentheses
+print(reader.to_speech("(a+b)/(c-d)"))
+# → "(a plus b) divided by (c minus d)"
+
+# Exponents – three equivalent ways
+print(reader.to_speech("x^2"))     # caret
+print(reader.to_speech("x**2"))    # double-star
+print(reader.to_speech("x²"))      # Unicode superscript
+
+# Subscripts
+print(reader.to_speech("x_i"))
+print(reader.to_speech("x₁"))  # Unicode subscript
+
+# Square root
+print(reader.to_speech("sqrt(x^2 + y^2)"))
+
+# Unicode Greek and symbols
+print(reader.to_speech("π ≈ 3.14159"))
+print(reader.to_speech("α² + β² ≤ γ²"))
+
+# Named functions
+print(reader.to_speech("sin(x) * cos(x)"))
+```
+
+### Copy-Paste from Documents
+
+```python
+# Common formats found in textbooks or web pages:
+reader.to_speech("E = mc²")          # Einstein's equation
+reader.to_speech("H₂O")             # Water formula
+reader.to_speech("x² + y² = r²")    # Circle equation
+reader.to_speech("∫ x² dx")         # Integral
+reader.to_speech("∑ aᵢ = S")        # Summation
+```
+
+---
+
 ## Basic Usage
 
 ### Simple Fraction

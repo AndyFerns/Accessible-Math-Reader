@@ -9,12 +9,12 @@
 Every math expression flows through a three-stage pipeline:
 
 ```
-Input (LaTeX / MathML)
+Input (LaTeX / MathML / Plaintext-Unicode)
         │
         ▼
   ┌───────────┐
   │   Parser   │   MathParser.parse()
-  │ (core/     │   • Auto-detects LaTeX vs MathML
+  │ (core/     │   • Auto-detects LaTeX vs MathML vs Plaintext
   │  parser.py)│   • Tokenizes and parses to AST
   └─────┬─────┘
         │ SemanticNode tree
@@ -47,7 +47,7 @@ Input (LaTeX / MathML)
 
 | Module | Responsibility |
 |---|---|
-| `parser.py` | `MathParser` — Parses LaTeX and MathML into `SemanticNode` trees. Handles fractions, exponents, subscripts, roots, summations, integrals, Greek letters, and more. |
+| `parser.py` | `MathParser` — Parses LaTeX, MathML, and plaintext/Unicode into `SemanticNode` trees. Auto-detects format. Handles fractions, exponents, subscripts, roots, summations, integrals, Greek letters, Unicode math symbols, and more. |
 | `semantic.py` | `SemanticNode`, `NodeType`, `MathNavigator` — The format-agnostic AST. Nodes carry type, content, children, parent references, and accessibility metadata. |
 | `renderer.py` | `BaseRenderer` (ABC), `MathRenderer` — Dispatches rendering to speech or Braille converters. |
 | `aria_navigator.py` | `ARIANavigator`, `FocusManager` — ARIA-enhanced navigation with Browse / Explore / Verbose Learning modes, roving tabindex, and screen reader announcements. |
@@ -98,7 +98,7 @@ Input (LaTeX / MathML)
 
 ## Design Decisions
 
-1. **Semantic AST as the pivot format** — All input formats parse to the same `SemanticNode` tree, making it trivial to add new input formats or output renderers without coupling.
+1. **Semantic AST as the pivot format** — All input formats (LaTeX, MathML, plaintext) parse to the same `SemanticNode` tree, making it trivial to add new input formats or output renderers without coupling.
 
 2. **Doxygen-style docstrings** — The project uses `@brief`, `@param`, `@return` docstrings for compatibility with Doxygen and for clear structured documentation.
 

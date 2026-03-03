@@ -1,12 +1,12 @@
 # Accessible Math Reader
 
-> **Screen-reader-first mathematical accessibility toolkit** — convert LaTeX and MathML to speech, Braille, and accessible ARIA HTML.
+> **Screen-reader-first mathematical accessibility toolkit** — convert LaTeX, MathML, and plaintext/Unicode math to speech, Braille, and accessible ARIA HTML.
 
 ---
 
 ## What is AMR?
 
-Accessible Math Reader (AMR) is a Python toolkit that bridges the gap between mathematical notation and assistive technology. It parses LaTeX and MathML inputs and produces:
+Accessible Math Reader (AMR) is a Python toolkit that bridges the gap between mathematical notation and assistive technology. It parses LaTeX, MathML, and everyday plaintext/Unicode math inputs and produces:
 
 | Output | Description |
 |---|---|
