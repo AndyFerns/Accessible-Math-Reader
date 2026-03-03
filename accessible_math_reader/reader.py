@@ -5,9 +5,10 @@
 @details
 Provides the primary user-facing API that combines parsing, speech
 generation, and Braille conversion into a simple, unified interface.
+Accepts LaTeX, MathML, and plaintext/Unicode math expressions.
 
 @author Accessible Math Reader Contributors
-@version 0.1.0
+@version 0.2.0
 """
 
 from __future__ import annotations
@@ -82,10 +83,11 @@ class MathReader:
         @brief Parse mathematical input to semantic tree.
         
         @details
-        Accepts LaTeX or MathML input and returns a semantic
-        representation suitable for further processing.
+        Accepts LaTeX, MathML, or plaintext/Unicode math input and
+        returns a semantic representation suitable for further processing.
+        The input format is auto-detected.
         
-        @param math_input LaTeX or MathML string
+        @param math_input LaTeX, MathML, or plaintext math string
         @return Root SemanticNode of the parsed expression
         @throws ParseError If parsing fails
         """

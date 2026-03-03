@@ -102,50 +102,172 @@ def parse_latex(latex_str):
 
 
 # --- NEW FUNCTION ---
-def latex_to_braille_simple(latex_str):
+def latex_to_braille_simple(input_str):
     """
-    Convert LaTeX to a simple char string that braille_converter.py can understand.
-    Example: \frac{a}{b} -> (a)/(b)
-    Example: a^2 -> a2
-    Example: b_i -> bi
+    Convert LaTeX, MathML, or plaintext to a simple char string
+    that braille_converter.py can understand.
+
+    Examples:
+        \frac{a}{b}  -> (a)/(b)
+        a^2          -> a2
+        b_i          -> bi
+        x² + y²      -> x2+y2
+        (a+b)/(c-d)  -> (a+b)/(c-d)
     """
-    if latex_str.strip().startswith("<math"):
-        # This is a simple fallback for MathML. A proper solution
-        # would be a full MathML to simple text converter.
+    stripped = input_str.strip()
+
+    # MathML branch – no change from original behaviour
+    if stripped.startswith("<math"):
         return "MathML(Braille-TBD)"
-        
-    text = latex_str.strip()
-    
-    # Simple replacements that map to BRAILLE_MAP
-    replacements = [
-        # Fractions
-        (r'\\frac{(.+?)}{(.+?)}', r'(\1)/(\2)'),
-        # Exponents: a^2 -> a2, a^{10} -> a10
-        (r'([a-zA-Z0-9]+)\^\{?(.+?)\}?', r'\1\2'),
-        # Subscripts: b_i -> bi, b_{10} -> b10
-        (r'([a-zA-Z0-9]+)_\{?(.+?)\}?', r'\1\2'),
-        # Symbols
-        (r'\\pm', '+'), # Simplified from +-
-        (r'\\times', '*'),
-        (r'\\cdot', '*'),
-        (r'\\div', '/'),
-        # Remove symbols not in braille map
-        (r'[$]', ''), (r'[\\{}]', ''),
-        (r'\\sqrt', ''), # No good braille map for 'sqrt'
-    ]
-    
-    for pattern, repl in replacements:
-        text = re.sub(pattern, repl, text)
-    
-    # Remove any remaining whitespace
+
+    # Detect whether the input is LaTeX or plaintext.
+    # LaTeX is recognised by the presence of backslash commands.
+    import re as _re
+    is_latex = bool(_re.search(r"\\[a-zA-Z]+", stripped))
+
+    if is_latex:
+        text = stripped
+        # Original LaTeX → simple-string replacements
+        replacements = [
+            (r'\\frac{(.+?)}{(.+?)}', r'(\1)/(\2)'),
+            (r'([a-zA-Z0-9]+)\^\{?(.+?)\}?', r'\1\2'),
+            (r'([a-zA-Z0-9]+)_\{?(.+?)\}?', r'\1\2'),
+            (r'\\pm', '+'),
+            (r'\\times', '*'),
+            (r'\\cdot', '*'),
+            (r'\\div', '/'),
+            (r'[$]', ''), (r'[\\{}]', ''),
+            (r'\\sqrt', ''),
+        ]
+        for pattern, repl in replacements:
+            text = _re.sub(pattern, repl, text)
+        return text.replace(' ', '')
+
+    # Plaintext / Unicode branch -------------------------------------------
+    # Strip Unicode super/subscript digits into their ASCII equivalents,
+    # map common Unicode symbols, and remove whitespace.
+    _sup_map = {
+        '\u2070': '0', '\u00b9': '1', '\u00b2': '2', '\u00b3': '3',
+        '\u2074': '4', '\u2075': '5', '\u2076': '6', '\u2077': '7',
+        '\u2078': '8', '\u2079': '9',
+    }
+    _sub_map = {
+        '\u2080': '0', '\u2081': '1', '\u2082': '2', '\u2083': '3',
+        '\u2084': '4', '\u2085': '5', '\u2086': '6', '\u2087': '7',
+        '\u2088': '8', '\u2089': '9',
+    }
+    _sym_map = {
+        '\u00d7': '*', '\u00b7': '*', '\u22c5': '*',
+        '\u00f7': '/', '\u00b1': '+', '\u221a': '',
+        '\u03c0': 'pi', '\u221e': 'inf',
+        '\u2264': '<', '\u2265': '>', '\u2260': '!=',
+    }
+    text = stripped
+    for src, dst in {**_sup_map, **_sub_map, **_sym_map}.items():
+        text = text.replace(src, dst)
+    # Replace ** with nothing (already handled by removing the operator)
+    text = text.replace('**', '')
     return text.replace(' ', '')
+
+
+def _parse_plaintext(text):
+    """
+    Parse a plaintext / Unicode math expression into readable English.
+
+    This handles everyday copy-paste formats such as:
+        (a+b)/(c-d)   -> (a plus b) divided by (c minus d)
+        x^2           -> x to the power of 2
+        x**2          -> x to the power of 2
+        sqrt(x)       -> square root of x
+        x² + y²       -> x to the power of 2 plus y to the power of 2
+        π             -> pi
+        ≤  ≥  ≠       -> less than or equal to / greater than or equal to / not equal to
+    """
+    import re as _re
+
+    # 1. Map Unicode symbols to words
+    _symbol_words = {
+        'π': 'pi', 'α': 'alpha', 'β': 'beta', 'γ': 'gamma',
+        'δ': 'delta', 'ε': 'epsilon', 'θ': 'theta', 'λ': 'lambda',
+        'σ': 'sigma', 'ω': 'omega', 'Σ': 'summation of',
+        '∫': 'integral of', '∞': 'infinity',
+        '±': 'plus or minus', '×': 'times', '·': 'times',
+        '÷': 'divided by', '√': 'square root of',
+        '≤': 'less than or equal to', '≥': 'greater than or equal to',
+        '≠': 'not equal to', '≈': 'approximately equal to',
+    }
+    for src, dst in _symbol_words.items():
+        text = text.replace(src, f' {dst} ')
+
+    # 2. Unicode superscript digits -> "to the power of N"
+    _sup_map = {
+        '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+        '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+    }
+    sup_pat = '[' + ''.join(_sup_map.keys()) + ']+'
+    def _sup_repl(m):
+        digits = ''.join(_sup_map[c] for c in m.group())
+        return f' to the power of {digits}'
+    text = _re.sub(sup_pat, _sup_repl, text)
+
+    # 3. Unicode subscript digits -> "sub N"
+    _sub_map = {
+        '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4',
+        '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9',
+    }
+    sub_pat = '[' + ''.join(_sub_map.keys()) + ']+'
+    def _sub_repl(m):
+        digits = ''.join(_sub_map[c] for c in m.group())
+        return f' sub {digits}'
+    text = _re.sub(sub_pat, _sub_repl, text)
+
+    # 4. Structural patterns (order matters)
+    structural = [
+        # sqrt(...)  -> square root of (...)
+        (r'sqrt\((.+?)\)', r'square root of (\1)'),
+        # Exponents: x^{...} or x^y  or x**y
+        (r'([a-zA-Z0-9]+)\*\*\{(.+?)\}', r'\1 to the power of (\2)'),
+        (r'([a-zA-Z0-9]+)\*\*([a-zA-Z0-9]+)', r'\1 to the power of \2'),
+        (r'([a-zA-Z0-9]+)\^\{(.+?)\}', r'\1 to the power of (\2)'),
+        (r'([a-zA-Z0-9]+)\^([a-zA-Z0-9]+)', r'\1 to the power of \2'),
+        # Subscripts: H_{...} or H_2
+        (r'([a-zA-Z0-9]+)_\{(.+?)\}', r'\1 sub (\2)'),
+        (r'([a-zA-Z0-9]+)_([a-zA-Z0-9]+)', r'\1 sub \2'),
+    ]
+    for pattern, repl in structural:
+        text = _re.sub(pattern, repl, text)
+    # Second pass for nested cases
+    for pattern, repl in structural:
+        text = _re.sub(pattern, repl, text)
+
+    # 5. Operator words
+    _ops = {
+        '+': ' plus ', '-': ' minus ', '=': ' equals ',
+        '*': ' times ', '/': ' divided by ',
+        '<': ' less than ', '>': ' greater than ',
+    }
+    for src, dst in _ops.items():
+        text = text.replace(src, dst)
+
+    # 6. Clean up braces and normalise whitespace
+    text = text.replace('{', '(').replace('}', ')')
+    return ' '.join(text.split())
 
 
 def parse_math_input(math_str):
     """
-    Detect whether input is LaTeX or MathML and return readable text for SPEECH.
+    Detect whether input is LaTeX, MathML, or plaintext and return
+    readable English text suitable for speech output.
+
+    Detection heuristics (applied in order):
+      1. Starts with '<math' -> MathML
+      2. Contains LaTeX commands (e.g. \\frac, \\sqrt) -> LaTeX
+      3. Everything else -> plaintext / Unicode math
     """
-    if math_str.strip().startswith("<math"):
-        return parse_mathml(math_str)
-    else:
-        return parse_latex(math_str)
+    import re as _re
+    stripped = math_str.strip()
+    if stripped.startswith("<math"):
+        return parse_mathml(stripped)
+    if _re.search(r"\\[a-zA-Z]+", stripped):
+        return parse_latex(stripped)
+    return _parse_plaintext(stripped)

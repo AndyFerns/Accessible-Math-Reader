@@ -1,14 +1,21 @@
 """!
 @file core/parser.py
-@brief Math expression parser for LaTeX and MathML input.
+@brief Math expression parser for LaTeX, MathML, and plaintext input.
 
 @details
-Converts LaTeX and MathML strings into a semantic AST representation.
-Supports common mathematical constructs including fractions, exponents,
-subscripts, Greek letters, and operators.
+Converts LaTeX, MathML, and plaintext/Unicode math strings into a
+semantic AST representation. Supports common mathematical constructs
+including fractions, exponents, subscripts, Greek letters, operators,
+and standard copy-paste formats with Unicode math symbols.
+
+The parser auto-detects the input format using the following heuristics:
+  1. If the input starts with '<math' or '<?xml', it is parsed as MathML.
+  2. If the input contains LaTeX commands (backslash followed by letters),
+     it is parsed as LaTeX.
+  3. Otherwise, it is parsed as plaintext/Unicode math.
 
 @author Accessible Math Reader Contributors
-@version 0.1.0
+@version 0.2.0
 """
 
 from __future__ import annotations
@@ -55,25 +62,34 @@ class ParseError(Exception):
 
 class MathParser:
     """!
-    @brief Parser for converting LaTeX/MathML to semantic representation.
+    @brief Parser for converting LaTeX/MathML/plaintext to semantic representation.
     
     @details
     Provides a unified interface for parsing mathematical notation
-    into a format-agnostic semantic tree.
+    into a format-agnostic semantic tree. Supports three input formats:
+      - LaTeX  (e.g., \\frac{a}{b})
+      - MathML (e.g., <math><mfrac>...</mfrac></math>)
+      - Plaintext / Unicode math (e.g., (a+b)/(c-d), x², √x, π)
     
     @section parser_example Example Usage
     @code{.py}
     parser = MathParser()
     
-    # Parse LaTeX
+    # Parse LaTeX (auto-detected)
     tree = parser.parse(r"\\frac{a}{b}")
     
-    # Parse MathML
+    # Parse MathML (auto-detected)
     tree = parser.parse("<math><mfrac><mi>a</mi><mi>b</mi></mfrac></math>")
     
-    # Force specific format
+    # Parse plaintext / copy-paste math (auto-detected)
+    tree = parser.parse("(a+b)/(c-d)")
+    tree = parser.parse("x² + y² = z²")
+    tree = parser.parse("√(a² + b²)")
+    
+    # Force a specific format
     tree = parser.parse_latex(r"\\frac{a}{b}")
     tree = parser.parse_mathml("<math>...</math>")
+    tree = parser.parse_plaintext("a/b + c")
     @endcode
     """
     
@@ -106,20 +122,96 @@ class MathParser:
         "\\le": "≤", "\\ge": "≥", "\\ne": "≠",
     }
     
+    # ── Unicode superscript / subscript digit mappings ──────────────────
+    # Used by parse_plaintext() to convert Unicode super/subscript digits
+    # back to their numeric values for semantic tree construction.
+    UNICODE_SUPERSCRIPT_MAP: dict[str, str] = {
+        "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4",
+        "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
+        "⁺": "+", "⁻": "-", "⁼": "=", "⁽": "(", "⁾": ")",
+        "ⁿ": "n", "ⁱ": "i",
+    }
+
+    UNICODE_SUBSCRIPT_MAP: dict[str, str] = {
+        "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4",
+        "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9",
+        "₊": "+", "₋": "-", "₌": "=", "₍": "(", "₎": ")",
+        "ₐ": "a", "ₑ": "e", "ₒ": "o", "ₓ": "x", "ₙ": "n",
+        "ᵢ": "i", "ⱼ": "j", "ₖ": "k",
+    }
+
+    # Unicode symbol → canonical character used by the plaintext tokenizer.
+    UNICODE_SYMBOL_MAP: dict[str, str] = {
+        # Operators
+        "×": "*", "·": "*", "⋅": "*", "÷": "/",
+        "±": "±", "∓": "∓",
+        # Relations
+        "≤": "<=", "≥": ">=", "≠": "!=", "≈": "≈", "≡": "≡",
+        # Greek letters (Unicode char → name for speech)
+        "α": "alpha", "β": "beta", "γ": "gamma", "δ": "delta",
+        "ε": "epsilon", "ζ": "zeta", "η": "eta", "θ": "theta",
+        "ι": "iota", "κ": "kappa", "λ": "lambda", "μ": "mu",
+        "ν": "nu", "ξ": "xi", "π": "pi", "ρ": "rho",
+        "σ": "sigma", "τ": "tau", "υ": "upsilon", "φ": "phi",
+        "χ": "chi", "ψ": "psi", "ω": "omega",
+        "Γ": "Gamma", "Δ": "Delta", "Θ": "Theta", "Λ": "Lambda",
+        "Ξ": "Xi", "Π": "Pi", "Σ": "Sigma", "Φ": "Phi",
+        "Ψ": "Psi", "Ω": "Omega",
+        # Calculus / set symbols
+        "∑": "sum", "∏": "product", "∫": "integral", "∞": "infinity",
+        "√": "sqrt",
+    }
+
+    # ── Format detection regex ─────────────────────────────────────────
+    # Matches LaTeX backslash commands like \frac, \sqrt, \alpha, etc.
+    _LATEX_CMD_RE = re.compile(r"\\[a-zA-Z]+")
+
+    def _detect_format(self, input_str: str) -> str:
+        """!
+        @brief Auto-detect whether input is MathML, LaTeX, or plaintext.
+
+        @details
+        Detection heuristics (applied in order):
+          1. Starts with '<math' or '<?xml' → 'mathml'
+          2. Contains a LaTeX backslash command (e.g. \\frac) → 'latex'
+          3. Everything else → 'plaintext'
+
+        @param  input_str  Stripped input string
+        @return One of 'mathml', 'latex', or 'plaintext'
+        """
+        if input_str.startswith("<math") or input_str.startswith("<?xml"):
+            return "mathml"
+        if self._LATEX_CMD_RE.search(input_str):
+            return "latex"
+        return "plaintext"
+
     def parse(self, input_str: str) -> SemanticNode:
         """!
         @brief Parse mathematical input, auto-detecting format.
-        
-        @param input_str LaTeX or MathML string
+
+        @details
+        Accepts LaTeX, MathML, or plaintext/Unicode math input.
+        The format is detected automatically:
+          - MathML if input starts with '<math' or '<?xml'
+          - LaTeX  if input contains backslash commands
+          - Plaintext otherwise (ASCII math, Unicode symbols, copy-paste)
+
+        @param  input_str  Mathematical expression in any supported format
         @return Root SemanticNode of the parsed expression
         @throws ParseError If parsing fails
         """
         input_str = input_str.strip()
-        
-        if input_str.startswith("<math") or input_str.startswith("<?xml"):
+        if not input_str:
+            raise ParseError("Empty input string")
+
+        fmt = self._detect_format(input_str)
+
+        if fmt == "mathml":
             return self.parse_mathml(input_str)
-        else:
+        elif fmt == "latex":
             return self.parse_latex(input_str)
+        else:
+            return self.parse_plaintext(input_str)
     
     def parse_latex(self, latex: str) -> SemanticNode:
         """!
@@ -611,3 +703,484 @@ class MathParser:
             # Unknown element - try to parse children
             for child in elem:
                 self._parse_mathml_element(child, parent)
+
+    # =====================================================================
+    # PLAINTEXT / UNICODE MATH PARSER
+    # =====================================================================
+
+    def parse_plaintext(self, text: str) -> SemanticNode:
+        """!
+        @brief Parse a plaintext or Unicode math expression.
+
+        @details
+        Handles everyday copy-paste math formats including:
+          - Fractions:      a/b, (a+b)/(c-d)
+          - Exponents:      x^2, x^{10}, x**2
+          - Subscripts:     x_i, x_{10}
+          - Square root:    sqrt(x), √(x), √x
+          - Unicode digits: x², x₁, y³
+          - Unicode Greek:  π, α, β, Σ, Δ
+          - Unicode ops:    ×, ÷, ±, ≤, ≥, ≠
+          - Functions:      sin(x), cos(x), log(x), ln(x), exp(x)
+          - Relations:      =, <, >, <=, >=, !=
+
+        The parser first normalises the input (expanding ** to ^,
+        converting Unicode super/subscript runs, and mapping Unicode
+        symbols) and then tokenises the result into a SemanticNode tree.
+
+        @param  text  Plaintext math string
+        @return Root SemanticNode of the parsed expression
+        @throws ParseError If parsing fails
+        """
+        text = text.strip()
+        if not text:
+            raise ParseError("Empty plaintext input")
+
+        # Step 1 – normalise the raw string
+        normalised = self._normalise_plaintext(text)
+
+        root = SemanticNode(NodeType.ROOT,
+                            metadata={"source": text, "format": "plaintext"})
+        self._parse_plaintext_tokens(normalised, root)
+        return root
+
+    # ── Normalisation ────────────────────────────────────────────────────
+
+    def _normalise_plaintext(self, text: str) -> str:
+        """!
+        @brief Normalise plaintext math to a canonical token-friendly form.
+
+        @details
+        Performs the following transformations (in order):
+          1. Convert Unicode super/subscript digit runs into ^{...} / _{...}
+          2. Replace ** with ^
+          3. Map Unicode symbols (×, ÷, Greek, √, ∞, etc.) to ASCII tokens
+          4. Normalise whitespace
+
+        @param  text  Raw plaintext input
+        @return Normalised string ready for tokenisation
+        """
+        result: list[str] = []
+        i = 0
+        while i < len(text):
+            ch = text[i]
+
+            # ── Unicode superscript run → ^{digits} ─────────────────
+            if ch in self.UNICODE_SUPERSCRIPT_MAP:
+                sup_chars: list[str] = []
+                while i < len(text) and text[i] in self.UNICODE_SUPERSCRIPT_MAP:
+                    sup_chars.append(self.UNICODE_SUPERSCRIPT_MAP[text[i]])
+                    i += 1
+                result.append("^{" + "".join(sup_chars) + "}")
+                continue
+
+            # ── Unicode subscript run → _{digits} ───────────────────
+            if ch in self.UNICODE_SUBSCRIPT_MAP:
+                sub_chars: list[str] = []
+                while i < len(text) and text[i] in self.UNICODE_SUBSCRIPT_MAP:
+                    sub_chars.append(self.UNICODE_SUBSCRIPT_MAP[text[i]])
+                    i += 1
+                result.append("_{" + "".join(sub_chars) + "}")
+                continue
+
+            # ── ** → ^ ──────────────────────────────────────────────
+            if ch == "*" and i + 1 < len(text) and text[i + 1] == "*":
+                result.append("^")
+                i += 2
+                continue
+
+            # ── Unicode symbol mapping ──────────────────────────────
+            if ch in self.UNICODE_SYMBOL_MAP:
+                mapped = self.UNICODE_SYMBOL_MAP[ch]
+                # Greek letters / function names are multi-char tokens
+                if mapped == "sqrt":
+                    result.append("sqrt")
+                elif mapped == "sum":
+                    result.append("∑")
+                elif mapped == "product":
+                    result.append("∏")
+                elif mapped == "integral":
+                    result.append("∫")
+                elif mapped == "infinity":
+                    result.append("∞")
+                elif len(mapped) > 1 and mapped.isalpha():
+                    # Greek letter name – wrap so tokeniser sees it
+                    result.append(f"«{mapped}»")
+                else:
+                    result.append(mapped)
+                i += 1
+                continue
+
+            # ── Pass through everything else ────────────────────────
+            result.append(ch)
+            i += 1
+
+        return "".join(result)
+
+    # ── Tokeniser / recursive-descent parser ─────────────────────────
+
+    # Regex for named math functions handled as FUNCTION nodes.
+    _FUNC_RE = re.compile(
+        r"^(sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|"
+        r"log|ln|exp|lim|sec|csc|cot)\b"
+    )
+
+    def _parse_plaintext_tokens(
+        self, text: str, parent: SemanticNode
+    ) -> None:
+        """!
+        @brief Tokenise normalised plaintext and add nodes to parent.
+
+        @details
+        Walks the string character-by-character, recognising:
+          - Numbers (integer and decimal)
+          - Identifiers (single Latin letters) and Greek «name» tokens
+          - Operators: + - * /
+          - Relations: =  < > <= >= != ≈ ≡
+          - Parentheses ( )
+          - Superscript ^ and subscript _
+          - sqrt(...) function calls
+          - Named math functions: sin, cos, etc.
+          - Special symbols: ∑ ∏ ∫ ∞ ± ∓
+
+        @param  text    Normalised plaintext string
+        @param  parent  Parent SemanticNode to append children to
+        """
+        pos = 0
+        length = len(text)
+
+        while pos < length:
+            ch = text[pos]
+
+            # ── Skip whitespace ─────────────────────────────────────
+            if ch.isspace():
+                pos += 1
+                continue
+
+            # ── Greek letter tokens wrapped by normaliser ───────────
+            if ch == "«":
+                end = text.find("»", pos)
+                if end == -1:
+                    end = length
+                name = text[pos + 1:end]
+                # Resolve to Unicode glyph via GREEK_LETTERS map
+                glyph = self.GREEK_LETTERS.get(
+                    name, self.GREEK_LETTERS.get(name.lower(), name)
+                )
+                parent.add_child(
+                    SemanticNode(NodeType.IDENTIFIER, content=glyph)
+                )
+                pos = end + 1
+                continue
+
+            # ── Special single-char symbols ─────────────────────────
+            if ch == "∑":
+                parent.add_child(SemanticNode(NodeType.SUM, content="∑"))
+                pos += 1
+                continue
+            if ch == "∏":
+                parent.add_child(SemanticNode(NodeType.PRODUCT, content="∏"))
+                pos += 1
+                continue
+            if ch == "∫":
+                parent.add_child(
+                    SemanticNode(NodeType.INTEGRAL, content="∫")
+                )
+                pos += 1
+                continue
+            if ch == "∞":
+                parent.add_child(
+                    SemanticNode(NodeType.IDENTIFIER, content="∞")
+                )
+                pos += 1
+                continue
+            if ch == "±":
+                parent.add_child(SemanticNode(NodeType.OPERATOR, content="±"))
+                pos += 1
+                continue
+            if ch == "∓":
+                parent.add_child(SemanticNode(NodeType.OPERATOR, content="∓"))
+                pos += 1
+                continue
+
+            # ── sqrt(...) or sqrt followed by single token ──────────
+            if text[pos:pos + 4] == "sqrt":
+                pos = self._parse_plaintext_sqrt(text, pos + 4, parent)
+                continue
+
+            # ── Named math functions (sin, cos, log, …) ────────────
+            func_m = self._FUNC_RE.match(text[pos:])
+            if func_m:
+                fname = func_m.group(1)
+                parent.add_child(
+                    SemanticNode(NodeType.FUNCTION, content=fname)
+                )
+                pos += len(fname)
+                continue
+
+            # ── Superscript ^ ───────────────────────────────────────
+            if ch == "^":
+                pos = self._parse_plaintext_super(text, pos, parent)
+                continue
+
+            # ── Subscript _ ─────────────────────────────────────────
+            if ch == "_":
+                pos = self._parse_plaintext_sub(text, pos, parent)
+                continue
+
+            # ── Parenthesised group ─────────────────────────────────
+            if ch == "(":
+                # Find matching close paren
+                paren_end = self._find_matching_paren(text, pos)
+                inner = text[pos + 1:paren_end]
+                group = SemanticNode(NodeType.GROUP)
+                self._parse_plaintext_tokens(inner, group)
+                parent.add_child(group)
+                pos = paren_end + 1
+                continue
+
+            if ch == ")":
+                # Stray close paren – add as operator for robustness
+                parent.add_child(
+                    SemanticNode(NodeType.OPERATOR, content=")")
+                )
+                pos += 1
+                continue
+
+            # ── Multi-char relational operators (<= >= != ≈ ≡) ─────
+            two = text[pos:pos + 2]
+            if two in ("<=", ">=", "!="):
+                rel_map = {"<=": "≤", ">=": "≥", "!=": "≠"}
+                parent.add_child(
+                    SemanticNode(NodeType.RELATION, content=rel_map[two])
+                )
+                pos += 2
+                continue
+            if ch in ("≈", "≡"):
+                parent.add_child(
+                    SemanticNode(NodeType.RELATION, content=ch)
+                )
+                pos += 1
+                continue
+
+            # ── Single-char operators ───────────────────────────────
+            if ch in "+-":
+                parent.add_child(
+                    SemanticNode(NodeType.OPERATOR, content=ch)
+                )
+                pos += 1
+                continue
+            if ch == "*":
+                parent.add_child(
+                    SemanticNode(NodeType.OPERATOR, content="×")
+                )
+                pos += 1
+                continue
+
+            # ── Division / potential fraction ───────────────────────
+            if ch == "/":
+                parent.add_child(
+                    SemanticNode(NodeType.OPERATOR, content="÷")
+                )
+                pos += 1
+                continue
+
+            # ── Single-char relations ───────────────────────────────
+            if ch in "=<>":
+                parent.add_child(
+                    SemanticNode(NodeType.RELATION, content=ch)
+                )
+                pos += 1
+                continue
+
+            # ── Numbers ─────────────────────────────────────────────
+            if ch.isdigit() or (
+                ch == "." and pos + 1 < length and text[pos + 1].isdigit()
+            ):
+                num, end = self._parse_number(text, pos)
+                parent.add_child(
+                    SemanticNode(NodeType.NUMBER, content=num)
+                )
+                pos = end
+                continue
+
+            # ── Identifiers (single letters) ────────────────────────
+            if ch.isalpha():
+                parent.add_child(
+                    SemanticNode(NodeType.IDENTIFIER, content=ch)
+                )
+                pos += 1
+                continue
+
+            # ── Braces (used after normalisation for ^{} / _{}) ────
+            if ch == "{":
+                brace_end = self._find_matching_brace(text, pos)
+                inner = text[pos + 1:brace_end]
+                group = SemanticNode(NodeType.GROUP)
+                self._parse_plaintext_tokens(inner, group)
+                parent.add_child(group)
+                pos = brace_end + 1
+                continue
+
+            # ── Fallback – unknown character as TEXT ─────────────────
+            parent.add_child(SemanticNode(NodeType.TEXT, content=ch))
+            pos += 1
+
+    # ── Plaintext helper: sqrt ───────────────────────────────────────
+
+    def _parse_plaintext_sqrt(
+        self, text: str, pos: int, parent: SemanticNode
+    ) -> int:
+        """!
+        @brief Parse sqrt(...) or sqrt followed by a single token.
+
+        @param  text    Full normalised string
+        @param  pos     Position immediately after "sqrt"
+        @param  parent  Parent node
+        @return Position after the sqrt expression
+        """
+        pos = self._skip_whitespace(text, pos)
+
+        sqrt_node = SemanticNode(NodeType.SQRT)
+        radicand = SemanticNode(NodeType.GROUP, metadata={"role": "radicand"})
+
+        if pos < len(text) and text[pos] == "(":
+            paren_end = self._find_matching_paren(text, pos)
+            inner = text[pos + 1:paren_end]
+            self._parse_plaintext_tokens(inner, radicand)
+            pos = paren_end + 1
+        elif pos < len(text) and text[pos] == "{":
+            brace_end = self._find_matching_brace(text, pos)
+            inner = text[pos + 1:brace_end]
+            self._parse_plaintext_tokens(inner, radicand)
+            pos = brace_end + 1
+        elif pos < len(text):
+            # Single character / number after sqrt
+            if text[pos].isdigit():
+                num, end = self._parse_number(text, pos)
+                radicand.add_child(
+                    SemanticNode(NodeType.NUMBER, content=num)
+                )
+                pos = end
+            elif text[pos].isalpha():
+                radicand.add_child(
+                    SemanticNode(NodeType.IDENTIFIER, content=text[pos])
+                )
+                pos += 1
+            else:
+                radicand.add_child(
+                    SemanticNode(NodeType.TEXT, content=text[pos])
+                )
+                pos += 1
+
+        sqrt_node.add_child(radicand)
+        parent.add_child(sqrt_node)
+        return pos
+
+    # ── Plaintext helper: superscript ────────────────────────────────
+
+    def _parse_plaintext_super(
+        self, text: str, pos: int, parent: SemanticNode
+    ) -> int:
+        """!
+        @brief Parse superscript (^) in plaintext.
+
+        @param  text    Full normalised string
+        @param  pos     Position of '^'
+        @param  parent  Parent node
+        @return Position after the superscript
+        """
+        pos += 1  # skip ^
+
+        if not parent.children:
+            raise ParseError("Superscript without base", pos, text)
+        base = parent.children.pop()
+
+        # Parse exponent
+        if pos < len(text) and text[pos] == "{":
+            brace_end = self._find_matching_brace(text, pos)
+            exp_content = text[pos + 1:brace_end]
+            pos = brace_end + 1
+        elif pos < len(text) and text[pos] == "(":
+            paren_end = self._find_matching_paren(text, pos)
+            exp_content = text[pos + 1:paren_end]
+            pos = paren_end + 1
+        elif pos < len(text):
+            # Single character exponent
+            exp_content = text[pos]
+            pos += 1
+        else:
+            exp_content = ""
+
+        sup = SemanticNode(NodeType.SUPERSCRIPT)
+        sup.add_child(base)
+        exp_node = SemanticNode(NodeType.GROUP, metadata={"role": "exponent"})
+        self._parse_plaintext_tokens(exp_content, exp_node)
+        sup.add_child(exp_node)
+        parent.add_child(sup)
+        return pos
+
+    # ── Plaintext helper: subscript ──────────────────────────────────
+
+    def _parse_plaintext_sub(
+        self, text: str, pos: int, parent: SemanticNode
+    ) -> int:
+        """!
+        @brief Parse subscript (_) in plaintext.
+
+        @param  text    Full normalised string
+        @param  pos     Position of '_'
+        @param  parent  Parent node
+        @return Position after the subscript
+        """
+        pos += 1  # skip _
+
+        if not parent.children:
+            raise ParseError("Subscript without base", pos, text)
+        base = parent.children.pop()
+
+        # Parse subscript value
+        if pos < len(text) and text[pos] == "{":
+            brace_end = self._find_matching_brace(text, pos)
+            sub_content = text[pos + 1:brace_end]
+            pos = brace_end + 1
+        elif pos < len(text) and text[pos] == "(":
+            paren_end = self._find_matching_paren(text, pos)
+            sub_content = text[pos + 1:paren_end]
+            pos = paren_end + 1
+        elif pos < len(text):
+            sub_content = text[pos]
+            pos += 1
+        else:
+            sub_content = ""
+
+        sub_node = SemanticNode(NodeType.SUBSCRIPT)
+        sub_node.add_child(base)
+        sub_val = SemanticNode(NodeType.GROUP, metadata={"role": "subscript"})
+        self._parse_plaintext_tokens(sub_content, sub_val)
+        sub_node.add_child(sub_val)
+        parent.add_child(sub_node)
+        return pos
+
+    # ── Plaintext helper: matching parenthesis ───────────────────────
+
+    def _find_matching_paren(self, text: str, pos: int) -> int:
+        """!
+        @brief Find the closing ')' that matches the '(' at pos.
+
+        @param  text  Full string
+        @param  pos   Position of opening '('
+        @return Position of matching ')'
+        @throws ParseError If no match found
+        """
+        depth = 1
+        pos += 1
+        while pos < len(text) and depth > 0:
+            if text[pos] == "(":
+                depth += 1
+            elif text[pos] == ")":
+                depth -= 1
+            pos += 1
+        if depth != 0:
+            raise ParseError("Unclosed parenthesis", pos, text)
+        return pos - 1

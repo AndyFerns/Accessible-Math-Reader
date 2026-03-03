@@ -4,13 +4,19 @@
 
 @details
 Provides a CLI tool for converting mathematical notation to speech
-and Braille from the command line. Supports both interactive and
-batch processing modes.
+and Braille from the command line. Accepts LaTeX, MathML, and
+plaintext/Unicode math input. Supports both interactive and batch
+processing modes.
 
 @section cli_usage Usage Examples
 @code{.bash}
 # Convert LaTeX to speech
 amr "\\frac{a}{b}"
+
+# Convert plaintext / Unicode math
+amr "x² + y² = z²"
+amr "(a+b)/(c-d)"
+amr "sqrt(x) + π"
 
 # Convert to Braille
 amr --braille "\\frac{a}{b}"
@@ -32,7 +38,7 @@ amr --interactive
 @endcode
 
 @author Accessible Math Reader Contributors
-@version 0.1.0
+@version 0.2.0
 """
 
 from __future__ import annotations
@@ -63,7 +69,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "expression",
         nargs="?",
-        help="Mathematical expression to convert (LaTeX or MathML)"
+        help="Mathematical expression to convert (LaTeX, MathML, or plaintext)"
     )
     
     parser.add_argument(
@@ -227,7 +233,8 @@ def run_interactive(reader: MathReader, args: argparse.Namespace) -> None:
     @param args Parsed arguments
     """
     print("Accessible Math Reader - Interactive Mode")
-    print("Enter mathematical expressions (LaTeX or MathML)")
+    print("Enter mathematical expressions (LaTeX, MathML, or plaintext)")
+    print("  Plaintext examples: x^2 + y^2 = z^2, (a+b)/(c-d), sqrt(x), x², π")
     print("Commands: :quit, :verbosity <level>, :braille, :speech")
     print("-" * 50)
     

@@ -192,6 +192,21 @@
                         <span class="example-btn__preview">[a b; c d]</span>
                         <span class="example-btn__label">Matrix</span>
                     </button>
+                    <button class="example-btn" onclick="insertExample('plaintext_pythag')"
+                        title="Plaintext Pythagorean theorem with Unicode superscripts">
+                        <span class="example-btn__preview">x² + y² = z²</span>
+                        <span class="example-btn__label">Plaintext</span>
+                    </button>
+                    <button class="example-btn" onclick="insertExample('plaintext_fraction')"
+                        title="Plaintext fraction using parentheses">
+                        <span class="example-btn__preview">(a+b)/(c-d)</span>
+                        <span class="example-btn__label">Plain Frac</span>
+                    </button>
+                    <button class="example-btn" onclick="insertExample('plaintext_mixed')"
+                        title="Plaintext with sqrt, Unicode Greek, and operators">
+                        <span class="example-btn__preview">sqrt(x²) + π</span>
+                        <span class="example-btn__label">Unicode</span>
+                    </button>
                 </div>
             </section>
 
@@ -214,10 +229,12 @@
                     Quick Tips
                 </h2>
                 <ul class="tips-list">
-                    <li>Use <code>\frac{a}{b}</code> for fractions</li>
-                    <li>Use <code>x^2</code> for superscripts</li>
-                    <li>Use <code>\sqrt{x}</code> for square roots</li>
-                    <li>Use <code>\sum_{i=1}^{n}</code> for summations</li>
+                    <li>Plaintext: <code>x² + y² = z²</code></li>
+                    <li>Plaintext: <code>(a+b)/(c-d)</code></li>
+                    <li>Functions: <code>sqrt(x)</code>, <code>sin(x)</code></li>
+                    <li>Unicode: <code>π α β ∑ ∫ ∞ ± ≤ ≥</code></li>
+                    <li>LaTeX: <code>\frac{a}{b}</code></li>
+                    <li>LaTeX: <code>x^2</code>, <code>\sqrt{x}</code></li>
                     <li>Greek: <code>\alpha, \beta, \pi</code></li>
                 </ul>
             </section>
@@ -284,16 +301,18 @@
         <main class="content" role="main">
             <!-- INPUT SECTION -->
             <section class="input-section" aria-labelledby="input-heading">
-                <h2 id="input-heading" class="section-heading">Enter LaTeX or MathML Expression</h2>
+                <h2 id="input-heading" class="section-heading">Enter Math Expression</h2>
 
                 <form action="/convert" method="POST" class="input-form" id="convertForm">
                     <div class="input-wrapper">
                         <textarea id="math_input" name="math_input" class="input-textarea" rows="4"
-                            placeholder="e.g. \frac{a^2 + b^2}{c} or \int_0^\infty e^{-x^2} dx"
+                            placeholder="e.g. x² + y² = z²  or  (a+b)/(c-d)  or  \frac{a}{b}  or  sqrt(x) + π"
                             aria-describedby="input-help" required>{{ input_text or '' }}</textarea>
 
                         <p id="input-help" class="input-help">
-                            Enter LaTeX (e.g., <code>\frac{1}{2}</code>) or MathML markup
+                            Enter LaTeX (e.g., <code>\frac{1}{2}</code>), MathML, or
+                            plaintext math (e.g., <code>x² + y²</code>, <code>(a+b)/(c-d)</code>,
+                            <code>sqrt(x)</code>, <code>π</code>)
                         </p>
                     </div>
 
@@ -532,7 +551,7 @@
                 Braille, and screen-reader-friendly formats.</p>
             <p><strong>Features:</strong></p>
             <ul>
-                <li>LaTeX and MathML parsing</li>
+                <li>LaTeX, MathML, and plaintext/Unicode input</li>
                 <li>Nemeth and UEB Braille output</li>
                 <li>Text-to-speech with multiple styles</li>
                 <li>ARIA-enhanced accessible navigation</li>

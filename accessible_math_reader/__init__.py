@@ -3,8 +3,9 @@
 @brief Accessible Math Reader - Screen-reader-first math accessibility toolkit.
 
 @details
-This package provides tools for converting mathematical notation (LaTeX, MathML)
-into accessible formats including speech output and Braille notation.
+This package provides tools for converting mathematical notation
+(LaTeX, MathML, and plaintext/Unicode math) into accessible formats
+including speech output and Braille notation.
 
 @section usage Public API Usage
 

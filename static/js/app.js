@@ -24,22 +24,22 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Accessible Math Reader initialized');
-    
+
     // Initialize theme from localStorage or default to dark
     initializeTheme();
-    
+
     // Initialize sidebar state
     initializeSidebar();
-    
+
     // Load history from localStorage
     loadHistory();
-    
+
     // Setup keyboard shortcuts
     setupKeyboardShortcuts();
-    
+
     // Setup form submission handler to save to history
     setupFormHandler();
-    
+
     // Setup settings change handlers
     setupSettingsHandlers();
 });
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function initializeTheme() {
     const savedTheme = localStorage.getItem('amr-theme');
-    
+
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
     } else {
@@ -69,10 +69,10 @@ function toggleTheme() {
     const html = document.documentElement;
     const currentTheme = html.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
+
     html.setAttribute('data-theme', newTheme);
     localStorage.setItem('amr-theme', newTheme);
-    
+
     // Announce theme change for screen readers
     announceToScreenReader(`Switched to ${newTheme} mode`);
 }
@@ -83,10 +83,10 @@ function toggleTheme() {
 function toggleHighContrast() {
     const html = document.documentElement;
     html.classList.toggle('high-contrast');
-    
+
     const isHighContrast = html.classList.contains('high-contrast');
     localStorage.setItem('amr-high-contrast', isHighContrast);
-    
+
     announceToScreenReader(`High contrast mode ${isHighContrast ? 'enabled' : 'disabled'}`);
 }
 
@@ -100,7 +100,7 @@ function toggleHighContrast() {
 function initializeSidebar() {
     const savedState = localStorage.getItem('amr-sidebar-collapsed');
     const sidebar = document.getElementById('sidebar');
-    
+
     if (savedState === 'true') {
         sidebar.classList.add('collapsed');
     }
@@ -112,10 +112,10 @@ function initializeSidebar() {
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('collapsed');
-    
+
     const isCollapsed = sidebar.classList.contains('collapsed');
     localStorage.setItem('amr-sidebar-collapsed', isCollapsed);
-    
+
     announceToScreenReader(`Sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`);
 }
 
@@ -135,7 +135,7 @@ function switchTab(tabName) {
         tab.classList.toggle('tab--active', isActive);
         tab.setAttribute('aria-selected', isActive);
     });
-    
+
     // Update tab panels
     const panels = document.querySelectorAll('.tab-panel');
     panels.forEach(panel => {
@@ -143,7 +143,7 @@ function switchTab(tabName) {
         panel.classList.toggle('tab-panel--active', isActive);
         panel.hidden = !isActive;
     });
-    
+
     // Announce tab change for screen readers
     announceToScreenReader(`${tabName} tab selected`);
 }
@@ -160,21 +160,33 @@ function switchTab(tabName) {
 const EXAMPLES = {
     // Comprehensive example covering most features
     comprehensive: String.raw`\int_0^\infty \sum_{n=1}^{N} \frac{\pi x^2}{\sqrt{a_n + b^3}} dx`,
-    
+
     // Simple fraction
     fraction: String.raw`\frac{a + b}{c - d}`,
-    
+
     // Quadratic formula
     quadratic: String.raw`x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}`,
-    
+
     // Definite integral
     integral: String.raw`\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}`,
-    
+
     // Summation series
     summation: String.raw`\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}`,
-    
+
     // 2x2 Matrix
-    matrix: String.raw`\begin{pmatrix} a & b \\ c & d \end{pmatrix}`
+    matrix: String.raw`\begin{pmatrix} a & b \\ c & d \end{pmatrix}`,
+
+    // ── Plaintext / Unicode examples ──────────────────────────────
+    // These demonstrate the new copy-paste-friendly input formats.
+
+    // Plaintext Pythagorean theorem with Unicode superscripts
+    plaintext_pythag: `x² + y² = z²`,
+
+    // Plaintext fraction with parentheses
+    plaintext_fraction: `(a + b) / (c - d)`,
+
+    // Plaintext with sqrt, Unicode Greek, and operators
+    plaintext_mixed: `sqrt(x² + y²) + π ≈ 4.87`,
 };
 
 /**
@@ -184,11 +196,11 @@ const EXAMPLES = {
 function insertExample(exampleName) {
     const textarea = document.getElementById('math_input');
     const example = EXAMPLES[exampleName];
-    
+
     if (example && textarea) {
         textarea.value = example;
         textarea.focus();
-        
+
         announceToScreenReader(`Inserted ${exampleName} example`);
     }
 }
@@ -222,21 +234,21 @@ function getHistory() {
  */
 function saveToHistory(expression) {
     if (!expression || expression.trim() === '') return;
-    
+
     let history = getHistory();
-    
+
     // Remove duplicate if exists
     history = history.filter(item => item !== expression);
-    
+
     // Add to beginning
     history.unshift(expression);
-    
+
     // Limit to max items
     history = history.slice(0, MAX_HISTORY_ITEMS);
-    
+
     // Save to localStorage
     localStorage.setItem('amr-history', JSON.stringify(history));
-    
+
     // Update display
     displayHistory(history);
 }
@@ -248,12 +260,12 @@ function saveToHistory(expression) {
 function displayHistory(history) {
     const container = document.getElementById('historyList');
     if (!container) return;
-    
+
     if (history.length === 0) {
         container.innerHTML = '<p class="history-empty">No recent expressions</p>';
         return;
     }
-    
+
     container.innerHTML = history.map((expr, idx) => `
         <button 
             class="example-btn" 
@@ -331,14 +343,14 @@ function setupSettingsHandlers() {
             setBrailleNotation(e.target.value);
         });
     });
-    
+
     // Speech style
     document.querySelectorAll('input[name="speech"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             setSpeechStyle(e.target.value);
         });
     });
-    
+
     // Navigation mode
     document.querySelectorAll('input[name="navmode"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -392,25 +404,25 @@ function setupKeyboardShortcuts() {
             const form = document.getElementById('convertForm');
             if (form) form.submit();
         }
-        
+
         // Ctrl + L: Clear input
         if (e.ctrlKey && e.key === 'l') {
             e.preventDefault();
             clearInput();
         }
-        
+
         // Ctrl + B: Toggle sidebar
         if (e.ctrlKey && e.key === 'b') {
             e.preventDefault();
             toggleSidebar();
         }
-        
+
         // Ctrl + Shift + T: Toggle theme
         if (e.ctrlKey && e.shiftKey && e.key === 'T') {
             e.preventDefault();
             toggleTheme();
         }
-        
+
         // Alt + 1-4: Switch tabs
         if (e.altKey && e.key >= '1' && e.key <= '4') {
             e.preventDefault();
@@ -509,7 +521,7 @@ function showFileDialog() {
 function saveOutput() {
     const brailleText = document.querySelector('.braille-display')?.textContent;
     const speechText = document.querySelector('.transcript-box p')?.textContent;
-    
+
     if (brailleText || speechText) {
         const content = `Speech: ${speechText || 'N/A'}\n\nBraille: ${brailleText || 'N/A'}`;
         downloadFile(content, 'math-output.txt', 'text/plain');
@@ -523,7 +535,7 @@ function saveOutput() {
  */
 function exportBraille() {
     const brailleText = document.querySelector('.braille-display')?.textContent;
-    
+
     if (brailleText) {
         downloadFile(brailleText, 'math-braille.brf', 'text/plain');
     } else {
@@ -583,7 +595,7 @@ async function copyToClipboard(text) {
 function announceToScreenReader(message) {
     // Create or find the live region
     let liveRegion = document.getElementById('aria-live-region');
-    
+
     if (!liveRegion) {
         liveRegion = document.createElement('div');
         liveRegion.id = 'aria-live-region';
@@ -593,7 +605,7 @@ function announceToScreenReader(message) {
         liveRegion.className = 'visually-hidden';
         document.body.appendChild(liveRegion);
     }
-    
+
     // Update the content to trigger announcement
     liveRegion.textContent = '';
     setTimeout(() => {
