@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accessible Math Reader</title>
-    
+
     <!-- 
         Accessible Math Reader - Frontend
         ==================================
@@ -18,18 +19,19 @@
         - Menu bar with 5 dropdown menus
         - Keyboard accessible throughout
     -->
-    
+
     <!-- Google Fonts - Inter for modern typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+
     <!-- MathJax for rendering LaTeX formulas -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
+
 <body>
     <!-- 
         ============================================================
@@ -42,7 +44,7 @@
             <span class="title-bar__icon" aria-hidden="true">📐</span>
             <h1 class="title-bar__title">Accessible Math Reader</h1>
         </div>
-        
+
         <!-- Menu Bar with 5 Dropdown Menus -->
         <nav class="menu-bar" aria-label="Main menu">
             <!-- FILE MENU -->
@@ -58,7 +60,7 @@
                     <li role="menuitem"><button onclick="window.close()">Exit</button></li>
                 </ul>
             </div>
-            
+
             <!-- EDIT MENU -->
             <div class="menu-item" role="menuitem" aria-haspopup="true">
                 <button class="menu-item__trigger" aria-expanded="false">Edit</button>
@@ -73,7 +75,7 @@
                     <li role="menuitem"><button onclick="clearInput()">Clear Input</button></li>
                 </ul>
             </div>
-            
+
             <!-- VIEW MENU -->
             <div class="menu-item" role="menuitem" aria-haspopup="true">
                 <button class="menu-item__trigger" aria-expanded="false">View</button>
@@ -88,27 +90,35 @@
                     <li role="menuitem"><button onclick="resetZoom()">Reset Zoom</button></li>
                 </ul>
             </div>
-            
+
             <!-- OPTIONS MENU -->
             <div class="menu-item" role="menuitem" aria-haspopup="true">
                 <button class="menu-item__trigger" aria-expanded="false">Options</button>
                 <ul class="menu-dropdown" role="menu">
                     <li class="menu-label">Speech Style</li>
-                    <li role="menuitemradio"><button onclick="setSpeechStyle('verbose')" aria-checked="true">Verbose</button></li>
-                    <li role="menuitemradio"><button onclick="setSpeechStyle('concise')" aria-checked="false">Concise</button></li>
-                    <li role="menuitemradio"><button onclick="setSpeechStyle('superbrief')" aria-checked="false">Super-brief</button></li>
+                    <li role="menuitemradio"><button onclick="setSpeechStyle('verbose')"
+                            aria-checked="true">Verbose</button></li>
+                    <li role="menuitemradio"><button onclick="setSpeechStyle('concise')"
+                            aria-checked="false">Concise</button></li>
+                    <li role="menuitemradio"><button onclick="setSpeechStyle('superbrief')"
+                            aria-checked="false">Super-brief</button></li>
                     <li class="menu-divider" role="separator"></li>
                     <li class="menu-label">Braille Notation</li>
-                    <li role="menuitemradio"><button onclick="setBrailleNotation('nemeth')" aria-checked="true">Nemeth</button></li>
-                    <li role="menuitemradio"><button onclick="setBrailleNotation('ueb')" aria-checked="false">UEB (Unified English Braille)</button></li>
+                    <li role="menuitemradio"><button onclick="setBrailleNotation('nemeth')"
+                            aria-checked="true">Nemeth</button></li>
+                    <li role="menuitemradio"><button onclick="setBrailleNotation('ueb')" aria-checked="false">UEB
+                            (Unified English Braille)</button></li>
                     <li class="menu-divider" role="separator"></li>
                     <li class="menu-label">Navigation Mode</li>
-                    <li role="menuitemradio"><button onclick="setNavMode('browse')" aria-checked="false">Browse</button></li>
-                    <li role="menuitemradio"><button onclick="setNavMode('explore')" aria-checked="true">Explore</button></li>
-                    <li role="menuitemradio"><button onclick="setNavMode('verbose')" aria-checked="false">Verbose Learning</button></li>
+                    <li role="menuitemradio"><button onclick="setNavMode('browse')" aria-checked="false">Browse</button>
+                    </li>
+                    <li role="menuitemradio"><button onclick="setNavMode('explore')"
+                            aria-checked="true">Explore</button></li>
+                    <li role="menuitemradio"><button onclick="setNavMode('verbose')" aria-checked="false">Verbose
+                            Learning</button></li>
                 </ul>
             </div>
-            
+
             <!-- HELP MENU -->
             <div class="menu-item" role="menuitem" aria-haspopup="true">
                 <button class="menu-item__trigger" aria-expanded="false">Help</button>
@@ -117,11 +127,12 @@
                     <li role="menuitem"><button onclick="showUserGuide()">User Guide</button></li>
                     <li class="menu-divider" role="separator"></li>
                     <li role="menuitem"><button onclick="showAbout()">About Accessible Math Reader</button></li>
-                    <li role="menuitem"><a href="https://github.com/your-repo/issues" target="_blank">Report Issue</a></li>
+                    <li role="menuitem"><a href="https://github.com/your-repo/issues" target="_blank">Report Issue</a>
+                    </li>
                 </ul>
             </div>
         </nav>
-        
+
         <!-- Theme Toggle Button (Quick Access) -->
         <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
             <span class="theme-toggle__icon theme-toggle__icon--dark">🌙</span>
@@ -140,10 +151,11 @@
         -->
         <aside class="sidebar" id="sidebar" aria-label="Sidebar">
             <!-- Sidebar Toggle Button -->
-            <button class="sidebar__toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar" title="Toggle sidebar">
+            <button class="sidebar__toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar"
+                title="Toggle sidebar">
                 <span class="sidebar__toggle-icon">◀</span>
             </button>
-            
+
             <!-- EXAMPLES SECTION -->
             <section class="sidebar__section">
                 <h2 class="sidebar__heading">
@@ -155,7 +167,8 @@
                         Comprehensive example covering: fraction, superscript, subscript, 
                         summation, integral, square root, Greek letters
                     -->
-                    <button class="example-btn" onclick="insertExample('comprehensive')" title="Comprehensive example with fractions, exponents, integrals, and Greek letters">
+                    <button class="example-btn" onclick="insertExample('comprehensive')"
+                        title="Comprehensive example with fractions, exponents, integrals, and Greek letters">
                         <span class="example-btn__preview">∫ Σ √ π x²</span>
                         <span class="example-btn__label">Comprehensive</span>
                     </button>
@@ -179,9 +192,24 @@
                         <span class="example-btn__preview">[a b; c d]</span>
                         <span class="example-btn__label">Matrix</span>
                     </button>
+                    <button class="example-btn" onclick="insertExample('plaintext_pythag')"
+                        title="Plaintext Pythagorean theorem with Unicode superscripts">
+                        <span class="example-btn__preview">x² + y² = z²</span>
+                        <span class="example-btn__label">Plaintext</span>
+                    </button>
+                    <button class="example-btn" onclick="insertExample('plaintext_fraction')"
+                        title="Plaintext fraction using parentheses">
+                        <span class="example-btn__preview">(a+b)/(c-d)</span>
+                        <span class="example-btn__label">Plain Frac</span>
+                    </button>
+                    <button class="example-btn" onclick="insertExample('plaintext_mixed')"
+                        title="Plaintext with sqrt, Unicode Greek, and operators">
+                        <span class="example-btn__preview">sqrt(x²) + π</span>
+                        <span class="example-btn__label">Unicode</span>
+                    </button>
                 </div>
             </section>
-            
+
             <!-- HISTORY SECTION -->
             <section class="sidebar__section">
                 <h2 class="sidebar__heading">
@@ -193,7 +221,7 @@
                     <p class="history-empty">No recent expressions</p>
                 </div>
             </section>
-            
+
             <!-- QUICK TIPS SECTION -->
             <section class="sidebar__section">
                 <h2 class="sidebar__heading">
@@ -201,21 +229,23 @@
                     Quick Tips
                 </h2>
                 <ul class="tips-list">
-                    <li>Use <code>\frac{a}{b}</code> for fractions</li>
-                    <li>Use <code>x^2</code> for superscripts</li>
-                    <li>Use <code>\sqrt{x}</code> for square roots</li>
-                    <li>Use <code>\sum_{i=1}^{n}</code> for summations</li>
+                    <li>Plaintext: <code>x² + y² = z²</code></li>
+                    <li>Plaintext: <code>(a+b)/(c-d)</code></li>
+                    <li>Functions: <code>sqrt(x)</code>, <code>sin(x)</code></li>
+                    <li>Unicode: <code>π α β ∑ ∫ ∞ ± ≤ ≥</code></li>
+                    <li>LaTeX: <code>\frac{a}{b}</code></li>
+                    <li>LaTeX: <code>x^2</code>, <code>\sqrt{x}</code></li>
                     <li>Greek: <code>\alpha, \beta, \pi</code></li>
                 </ul>
             </section>
-            
+
             <!-- SETTINGS SECTION -->
             <section class="sidebar__section sidebar__section--settings">
                 <h2 class="sidebar__heading">
                     <span class="sidebar__heading-icon" aria-hidden="true">⚙️</span>
                     Quick Settings
                 </h2>
-                
+
                 <!-- Braille Notation -->
                 <fieldset class="settings-group">
                     <legend>Braille Notation</legend>
@@ -228,7 +258,7 @@
                         <span>UEB</span>
                     </label>
                 </fieldset>
-                
+
                 <!-- Speech Style -->
                 <fieldset class="settings-group">
                     <legend>Speech Style</legend>
@@ -245,7 +275,7 @@
                         <span>Brief</span>
                     </label>
                 </fieldset>
-                
+
                 <!-- Navigation Mode -->
                 <fieldset class="settings-group">
                     <legend>Navigation Mode</legend>
@@ -271,25 +301,21 @@
         <main class="content" role="main">
             <!-- INPUT SECTION -->
             <section class="input-section" aria-labelledby="input-heading">
-                <h2 id="input-heading" class="section-heading">Enter LaTeX or MathML Expression</h2>
-                
+                <h2 id="input-heading" class="section-heading">Enter Math Expression</h2>
+
                 <form action="/convert" method="POST" class="input-form" id="convertForm">
                     <div class="input-wrapper">
-                        <textarea 
-                            id="math_input" 
-                            name="math_input" 
-                            class="input-textarea"
-                            rows="4" 
-                            placeholder="e.g. \frac{a^2 + b^2}{c} or \int_0^\infty e^{-x^2} dx"
-                            aria-describedby="input-help"
-                            required
-                        >{{ input_text or '' }}</textarea>
-                        
+                        <textarea id="math_input" name="math_input" class="input-textarea" rows="4"
+                            placeholder="e.g. x² + y² = z²  or  (a+b)/(c-d)  or  \frac{a}{b}  or  sqrt(x) + π"
+                            aria-describedby="input-help" required>{{ input_text or '' }}</textarea>
+
                         <p id="input-help" class="input-help">
-                            Enter LaTeX (e.g., <code>\frac{1}{2}</code>) or MathML markup
+                            Enter LaTeX (e.g., <code>\frac{1}{2}</code>), MathML, or
+                            plaintext math (e.g., <code>x² + y²</code>, <code>(a+b)/(c-d)</code>,
+                            <code>sqrt(x)</code>, <code>π</code>)
                         </p>
                     </div>
-                    
+
                     <div class="input-actions">
                         <button type="submit" class="btn btn--primary">
                             <span class="btn__icon" aria-hidden="true">▶</span>
@@ -305,187 +331,157 @@
             <!-- OUTPUT SECTION with Tabs -->
             <section class="output-section" aria-labelledby="output-heading">
                 <h2 id="output-heading" class="visually-hidden">Conversion Output</h2>
-                
+
                 <!-- Tab Navigation -->
                 <div class="tabs" role="tablist" aria-label="Output views">
-                    <button 
-                        class="tab tab--active" 
-                        role="tab" 
-                        aria-selected="true" 
-                        aria-controls="panel-formula"
-                        id="tab-formula"
-                        onclick="switchTab('formula')"
-                    >
+                    <button class="tab tab--active" role="tab" aria-selected="true" aria-controls="panel-formula"
+                        id="tab-formula" onclick="switchTab('formula')">
                         <span class="tab__icon" aria-hidden="true">🔬</span>
                         Formula
                     </button>
-                    <button 
-                        class="tab" 
-                        role="tab" 
-                        aria-selected="false" 
-                        aria-controls="panel-speech"
-                        id="tab-speech"
-                        onclick="switchTab('speech')"
-                    >
+                    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-speech" id="tab-speech"
+                        onclick="switchTab('speech')">
                         <span class="tab__icon" aria-hidden="true">🎧</span>
                         Speech
                     </button>
-                    <button 
-                        class="tab" 
-                        role="tab" 
-                        aria-selected="false" 
-                        aria-controls="panel-braille"
-                        id="tab-braille"
-                        onclick="switchTab('braille')"
-                    >
+                    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-braille" id="tab-braille"
+                        onclick="switchTab('braille')">
                         <span class="tab__icon" aria-hidden="true">⠿</span>
                         Braille
                     </button>
-                    <button 
-                        class="tab" 
-                        role="tab" 
-                        aria-selected="false" 
-                        aria-controls="panel-accessible"
-                        id="tab-accessible"
-                        onclick="switchTab('accessible')"
-                    >
+                    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-accessible"
+                        id="tab-accessible" onclick="switchTab('accessible')">
                         <span class="tab__icon" aria-hidden="true">♿</span>
                         Accessible
                     </button>
                 </div>
-                
+
                 <!-- Tab Panels -->
                 <div class="tab-panels">
                     <!-- FORMULA PANEL -->
-                    <div 
-                        class="tab-panel tab-panel--active" 
-                        role="tabpanel" 
-                        id="panel-formula"
-                        aria-labelledby="tab-formula"
-                    >
+                    <div class="tab-panel tab-panel--active" role="tabpanel" id="panel-formula"
+                        aria-labelledby="tab-formula">
                         {% if readable_text %}
                         <div class="formula-display" aria-label="Rendered mathematical formula">
-                            {% if input_text and input_text.strip().startswith('<math') %}
-                                {{ input_text | safe }}
+                            {% if input_text and input_text.strip().startswith('<math') %} {{ input_text | safe }} {%
+                                else %} $${{ input_text }}$$ {% endif %} </div>
+
+                                <!-- Copy Formula Actions - Multi-format clipboard support -->
+                                <div class="formula-actions" role="group" aria-label="Copy formula options">
+                                    <button type="button" class="btn btn--secondary btn--small"
+                                        onclick="copyFormula({ latex: {{ input_text | tojson }}, accessible: {{ readable_text | tojson }}, braille: {{ braille_text | default('', true) | tojson }} })"
+                                        aria-label="Copy formula with format selection">
+                                        📋 Copy Formula...
+                                    </button>
+                                    <button type="button" class="btn btn--secondary btn--small"
+                                        onclick="copyLatex({{ input_text | tojson }})" aria-label="Copy as LaTeX"
+                                        title="Copy LaTeX source">
+                                        📝 LaTeX
+                                    </button>
+                                    <button type="button" class="btn btn--secondary btn--small"
+                                        onclick="copyAccessible({{ readable_text | tojson }})"
+                                        aria-label="Copy accessible text" title="Copy screen reader text">
+                                        ♿ Accessible
+                                    </button>
+                                </div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <span class="empty-state__icon" aria-hidden="true">📝</span>
+                                    <h3>No formula yet</h3>
+                                    <p>Enter an expression above and click Convert</p>
+                                </div>
+                                {% endif %}
+                        </div>
+
+                        <!-- SPEECH PANEL -->
+                        <div class="tab-panel" role="tabpanel" id="panel-speech" aria-labelledby="tab-speech" hidden>
+                            {% if readable_text %}
+                            <div class="speech-content">
+                                <h3 class="panel-subheading">Audio Playback</h3>
+                                <audio controls class="audio-player">
+                                    <source src="{{ url_for('static', filename='audio/' + audio_file) }}"
+                                        type="audio/mpeg">
+                                    Your browser does not support audio playback.
+                                </audio>
+
+                                <h3 class="panel-subheading">Transcript</h3>
+                                <div class="transcript-box">
+                                    <p>{{ readable_text }}</p>
+                                </div>
+
+                                <button class="btn btn--secondary btn--small"
+                                    onclick="copyToClipboard('{{ readable_text }}')">
+                                    📋 Copy Transcript
+                                </button>
+                            </div>
                             {% else %}
-                                $${{ input_text }}$$
+                            <div class="empty-state">
+                                <span class="empty-state__icon" aria-hidden="true">🎧</span>
+                                <h3>No speech output yet</h3>
+                                <p>Convert an expression to hear it spoken</p>
+                            </div>
                             {% endif %}
                         </div>
-                        {% else %}
-                        <div class="empty-state">
-                            <span class="empty-state__icon" aria-hidden="true">📝</span>
-                            <h3>No formula yet</h3>
-                            <p>Enter an expression above and click Convert</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- SPEECH PANEL -->
-                    <div 
-                        class="tab-panel" 
-                        role="tabpanel" 
-                        id="panel-speech"
-                        aria-labelledby="tab-speech"
-                        hidden
-                    >
-                        {% if readable_text %}
-                        <div class="speech-content">
-                            <h3 class="panel-subheading">Audio Playback</h3>
-                            <audio controls class="audio-player">
-                                <source src="{{ url_for('static', filename='audio/' + audio_file) }}" type="audio/mpeg">
-                                Your browser does not support audio playback.
-                            </audio>
-                            
-                            <h3 class="panel-subheading">Transcript</h3>
-                            <div class="transcript-box">
-                                <p>{{ readable_text }}</p>
+
+                        <!-- BRAILLE PANEL -->
+                        <div class="tab-panel" role="tabpanel" id="panel-braille" aria-labelledby="tab-braille" hidden>
+                            {% if braille_text %}
+                            <div class="braille-content">
+                                <h3 class="panel-subheading">Nemeth Braille Output</h3>
+                                <div class="braille-display" aria-label="Braille representation">
+                                    {{ braille_text }}
+                                </div>
+
+                                <div class="braille-actions">
+                                    <button class="btn btn--secondary btn--small"
+                                        onclick="copyToClipboard('{{ braille_text }}')">
+                                        📋 Copy Braille
+                                    </button>
+                                    <button class="btn btn--secondary btn--small" onclick="exportBraille()">
+                                        💾 Export BRF
+                                    </button>
+                                </div>
                             </div>
-                            
-                            <button class="btn btn--secondary btn--small" onclick="copyToClipboard('{{ readable_text }}')">
-                                📋 Copy Transcript
-                            </button>
-                        </div>
-                        {% else %}
-                        <div class="empty-state">
-                            <span class="empty-state__icon" aria-hidden="true">🎧</span>
-                            <h3>No speech output yet</h3>
-                            <p>Convert an expression to hear it spoken</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- BRAILLE PANEL -->
-                    <div 
-                        class="tab-panel" 
-                        role="tabpanel" 
-                        id="panel-braille"
-                        aria-labelledby="tab-braille"
-                        hidden
-                    >
-                        {% if braille_text %}
-                        <div class="braille-content">
-                            <h3 class="panel-subheading">Nemeth Braille Output</h3>
-                            <div class="braille-display" aria-label="Braille representation">
-                                {{ braille_text }}
+                            {% else %}
+                            <div class="empty-state">
+                                <span class="empty-state__icon" aria-hidden="true">⠿</span>
+                                <h3>No Braille output yet</h3>
+                                <p>Convert an expression to see Braille</p>
                             </div>
-                            
-                            <div class="braille-actions">
-                                <button class="btn btn--secondary btn--small" onclick="copyToClipboard('{{ braille_text }}')">
-                                    📋 Copy Braille
-                                </button>
-                                <button class="btn btn--secondary btn--small" onclick="exportBraille()">
-                                    💾 Export BRF
-                                </button>
-                            </div>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div class="empty-state">
-                            <span class="empty-state__icon" aria-hidden="true">⠿</span>
-                            <h3>No Braille output yet</h3>
-                            <p>Convert an expression to see Braille</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- ACCESSIBLE PANEL -->
-                    <div 
-                        class="tab-panel" 
-                        role="tabpanel" 
-                        id="panel-accessible"
-                        aria-labelledby="tab-accessible"
-                        hidden
-                    >
-                        {% if readable_text %}
-                        <div class="accessible-content">
-                            <h3 class="panel-subheading">Accessible Navigation</h3>
-                            <p class="accessible-hint">
-                                Use <kbd>Enter</kbd> to drill down, <kbd>Escape</kbd> to go up, 
-                                <kbd>←</kbd> <kbd>→</kbd> to navigate siblings.
-                            </p>
-                            
-                            <!-- ARIA-enhanced math will be rendered here -->
-                            <div class="accessible-math" role="math" aria-label="Interactive mathematical expression" tabindex="0">
-                                {% if input_text and input_text.strip().startswith('<math') %}
-                                    {{ input_text | safe }}
+
+                        <!-- ACCESSIBLE PANEL -->
+                        <div class="tab-panel" role="tabpanel" id="panel-accessible" aria-labelledby="tab-accessible"
+                            hidden>
+                            {% if readable_text %}
+                            <div class="accessible-content">
+                                <h3 class="panel-subheading">Accessible Navigation</h3>
+                                <p class="accessible-hint">
+                                    Use <kbd>Enter</kbd> to drill down, <kbd>Escape</kbd> to go up,
+                                    <kbd>←</kbd> <kbd>→</kbd> to navigate siblings.
+                                </p>
+
+                                <!-- ARIA-enhanced math will be rendered here -->
+                                <div class="accessible-math" role="math"
+                                    aria-label="Interactive mathematical expression" tabindex="0">
+                                    {% if input_text and input_text.strip().startswith('<math') %} {{ input_text | safe
+                                        }} {% else %} $${{ input_text }}$$ {% endif %} </div>
+
+                                        <!-- Context/Where Am I display -->
+                                        <div class="context-display" id="contextDisplay" aria-live="polite">
+                                            <strong>Position:</strong> Root expression
+                                        </div>
+                                </div>
                                 {% else %}
-                                    $${{ input_text }}$$
+                                <div class="empty-state">
+                                    <span class="empty-state__icon" aria-hidden="true">♿</span>
+                                    <h3>No accessible output yet</h3>
+                                    <p>Convert an expression to explore it accessibly</p>
+                                </div>
                                 {% endif %}
                             </div>
-                            
-                            <!-- Context/Where Am I display -->
-                            <div class="context-display" id="contextDisplay" aria-live="polite">
-                                <strong>Position:</strong> Root expression
-                            </div>
                         </div>
-                        {% else %}
-                        <div class="empty-state">
-                            <span class="empty-state__icon" aria-hidden="true">♿</span>
-                            <h3>No accessible output yet</h3>
-                            <p>Convert an expression to explore it accessibly</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
             </section>
         </main>
     </div>
@@ -495,39 +491,67 @@
         MODALS/DIALOGS
         ============================================================
     -->
-    
+
     <!-- Keyboard Shortcuts Dialog -->
     <dialog id="shortcutsDialog" class="modal" aria-labelledby="shortcuts-title">
         <div class="modal__content">
             <h2 id="shortcuts-title">Keyboard Shortcuts</h2>
             <table class="shortcuts-table">
                 <thead>
-                    <tr><th>Action</th><th>Shortcut</th></tr>
+                    <tr>
+                        <th>Action</th>
+                        <th>Shortcut</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Convert expression</td><td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td></tr>
-                    <tr><td>Clear input</td><td><kbd>Ctrl</kbd> + <kbd>L</kbd></td></tr>
-                    <tr><td>Toggle sidebar</td><td><kbd>Ctrl</kbd> + <kbd>B</kbd></td></tr>
-                    <tr><td>Toggle theme</td><td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd></td></tr>
-                    <tr><td>Switch to Formula tab</td><td><kbd>Alt</kbd> + <kbd>1</kbd></td></tr>
-                    <tr><td>Switch to Speech tab</td><td><kbd>Alt</kbd> + <kbd>2</kbd></td></tr>
-                    <tr><td>Switch to Braille tab</td><td><kbd>Alt</kbd> + <kbd>3</kbd></td></tr>
-                    <tr><td>Switch to Accessible tab</td><td><kbd>Alt</kbd> + <kbd>4</kbd></td></tr>
+                    <tr>
+                        <td>Convert expression</td>
+                        <td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+                    </tr>
+                    <tr>
+                        <td>Clear input</td>
+                        <td><kbd>Ctrl</kbd> + <kbd>L</kbd></td>
+                    </tr>
+                    <tr>
+                        <td>Toggle sidebar</td>
+                        <td><kbd>Ctrl</kbd> + <kbd>B</kbd></td>
+                    </tr>
+                    <tr>
+                        <td>Toggle theme</td>
+                        <td><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd></td>
+                    </tr>
+                    <tr>
+                        <td>Switch to Formula tab</td>
+                        <td><kbd>Alt</kbd> + <kbd>1</kbd></td>
+                    </tr>
+                    <tr>
+                        <td>Switch to Speech tab</td>
+                        <td><kbd>Alt</kbd> + <kbd>2</kbd></td>
+                    </tr>
+                    <tr>
+                        <td>Switch to Braille tab</td>
+                        <td><kbd>Alt</kbd> + <kbd>3</kbd></td>
+                    </tr>
+                    <tr>
+                        <td>Switch to Accessible tab</td>
+                        <td><kbd>Alt</kbd> + <kbd>4</kbd></td>
+                    </tr>
                 </tbody>
             </table>
             <button class="btn btn--primary" onclick="closeModal('shortcutsDialog')">Close</button>
         </div>
     </dialog>
-    
+
     <!-- About Dialog -->
     <dialog id="aboutDialog" class="modal" aria-labelledby="about-title">
         <div class="modal__content">
             <h2 id="about-title">About Accessible Math Reader</h2>
             <p><strong>Version:</strong> 0.1.0</p>
-            <p>A production-grade, accessibility-first toolkit for converting mathematical expressions to speech, Braille, and screen-reader-friendly formats.</p>
+            <p>A production-grade, accessibility-first toolkit for converting mathematical expressions to speech,
+                Braille, and screen-reader-friendly formats.</p>
             <p><strong>Features:</strong></p>
             <ul>
-                <li>LaTeX and MathML parsing</li>
+                <li>LaTeX, MathML, and plaintext/Unicode input</li>
                 <li>Nemeth and UEB Braille output</li>
                 <li>Text-to-speech with multiple styles</li>
                 <li>ARIA-enhanced accessible navigation</li>
@@ -541,9 +565,9 @@
         FOOTER
         ============================================================
     -->
-    <footer class="app-footer">
+    <!-- <footer class="app-footer">
         <p>© 2025 Accessible Math Reader | Flask Edition</p>
-    </footer>
+    </footer> -->
 
     <!-- 
         ============================================================
@@ -551,5 +575,8 @@
         ============================================================
     -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <!-- Clipboard Module - Multi-format copy support -->
+    <script src="{{ url_for('static', filename='js/clipboard.js') }}"></script>
 </body>
+
 </html>

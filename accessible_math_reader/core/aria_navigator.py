@@ -299,22 +299,22 @@ class ARIANavigator(MathNavigator):
         
         # Can we go deeper?
         if node.children:
-            hints.append(\"Press Enter to explore\")
+            hints.append("Press Enter to explore")
         
         # Can we go to siblings?
         if node.parent:
             siblings = node.parent.get_navigable_children()
             idx = siblings.index(node) if node in siblings else -1
             if idx > 0:
-                hints.append(\"Left arrow for previous\")
+                hints.append("Left arrow for previous")
             if idx < len(siblings) - 1:
-                hints.append(\"Right arrow for next\")
+                hints.append("Right arrow for next")
         
         # Can we go up?
         if node.parent and node.parent.node_type != NodeType.ROOT:
-            hints.append(\"Escape to go up\")
+            hints.append("Escape to go up")
         
-        return \". \".join(hints) if hints else \"No navigation available\"
+        return ". ".join(hints) if hints else "No navigation available"
     
     def _generate_verbose_description(self, node: SemanticNode) -> str:
         """!
@@ -328,24 +328,24 @@ class ARIANavigator(MathNavigator):
         # Pedagogical descriptions for learning mode
         descriptions = {
             NodeType.FRACTION: (
-                \"A fraction represents division. It has a numerator (top) \"
-                \"and a denominator (bottom). The numerator is divided by the denominator.\"
+                "A fraction represents division. It has a numerator (top) "
+                "and a denominator (bottom). The numerator is divided by the denominator."
             ),
             NodeType.SUPERSCRIPT: (
-                \"A superscript represents exponentiation or power. \"
-                \"The base is raised to the power of the exponent.\"
+                "A superscript represents exponentiation or power. "
+                "The base is raised to the power of the exponent."
             ),
             NodeType.SQRT: (
-                \"A square root asks: what number, when multiplied by itself, \"
-                \"gives the number inside the root?\"
+                "A square root asks: what number, when multiplied by itself, "
+                "gives the number inside the root?"
             ),
             NodeType.SUM: (
-                \"A summation adds up a sequence of terms. \"
-                \"The variable below shows what changes, and the limits show the range.\"
+                "A summation adds up a sequence of terms. "
+                "The variable below shows what changes, and the limits show the range."
             ),
             NodeType.INTEGRAL: (
-                \"An integral calculates the area under a curve or the accumulated change. \"
-                \"It's the reverse operation of differentiation.\"
+                "An integral calculates the area under a curve or the accumulated change. "
+                "It's the reverse operation of differentiation."
             ),
         }
         
@@ -381,29 +381,29 @@ class ARIANavigator(MathNavigator):
         
         # Navigation commands
         if node.children:
-            commands[\"Explore this element\"] = \"Enter\"
+            commands["Explore this element"] = "Enter"
         
         if node.parent:
             siblings = node.parent.get_navigable_children()
             idx = siblings.index(node) if node in siblings else -1
             
             if idx > 0:
-                commands[\"Previous sibling\"] = \"Left Arrow\"
+                commands["Previous sibling"] = "Left Arrow"
             if idx < len(siblings) - 1:
-                commands[\"Next sibling\"] = \"Right Arrow\"
+                commands["Next sibling"] = "Right Arrow"
             
             if node.parent.node_type != NodeType.ROOT:
-                commands[\"Go to parent\"] = \"Escape\"
+                commands["Go to parent"] = "Escape"
         
         # Mode switching
-        commands[\"Switch mode\"] = \"M\"
+        commands["Switch mode"] = "M"
         
         # Context help
         if self.config.accessibility.enable_context_help:
-            commands[\"Where am I?\"] = \"?\"
+            commands["Where am I?"] = "?"
         
         # Help
-        commands[\"Show all shortcuts\"] = \"H\"
+        commands["Show all shortcuts"] = "H"
         
         return commands
     
@@ -510,7 +510,7 @@ class ARIANavigator(MathNavigator):
         @return Context description with breadcrumb trail
         """
         if not self.config.accessibility.enable_context_help:
-            return \"Context help is disabled\"
+            return "Context help is disabled"
         
         # Get path from root to current
         path = self.get_path()
@@ -519,13 +519,13 @@ class ARIANavigator(MathNavigator):
         breadcrumb_parts = []
         for node in path:
             if node.node_type == NodeType.ROOT:
-                breadcrumb_parts.append(\"Root\")
+                breadcrumb_parts.append("Root")
             elif 'aria_label' in node.accessibility_metadata:
                 breadcrumb_parts.append(node.accessibility_metadata['aria_label'])
             else:
                 breadcrumb_parts.append(self._generate_description(node))
         
-        breadcrumb = \" → \".join(breadcrumb_parts)
+        breadcrumb = " → ".join(breadcrumb_parts)
         
         # Add current position info
         current_desc = self._generate_description(self.current)
@@ -534,7 +534,7 @@ class ARIANavigator(MathNavigator):
         hints = self._generate_navigation_hint(self.current)
         
         return (
-            f\"You are at: {breadcrumb}\\n\"
-            f\"Current element: {current_desc}\\n\"
-            f\"Available actions: {hints}\"
+            f"You are at: {breadcrumb}\n"
+            f"Current element: {current_desc}\n"
+            f"Available actions: {hints}"
         )
