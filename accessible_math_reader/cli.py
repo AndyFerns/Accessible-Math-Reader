@@ -151,6 +151,22 @@ def create_parser() -> argparse.ArgumentParser:
         help="Show expression structure"
     )
     
+    # ── Validation subcommand (Feature 5) ─────────────────────
+    validate_group = parser.add_argument_group("Validation")
+    validate_group.add_argument(
+        "--validate",
+        metavar="FILE",
+        help=(
+            "Validate math expressions in a .tex/.txt file for "
+            "WCAG compliance and accessibility"
+        ),
+    )
+    validate_group.add_argument(
+        "--fail-on-error",
+        action="store_true",
+        help="Exit with code 1 if validation finds errors (CI mode)",
+    )
+    
     return parser
 
 
@@ -319,6 +335,20 @@ def main(argv: Optional[list[str]] = None) -> int:
         output = sys.stdout
     
     try:
+        # Validation mode (Feature 5) — must be checked before expression
+        if args.validate:
+            import json as _json
+            from accessible_math_reader.validation import MathValidator
+
+            validator = MathValidator()
+            results = validator.validate_file(
+                args.validate, fail_on_error=args.fail_on_error
+            )
+            output.write(_json.dumps(results, indent=2) + "\n")
+            if args.fail_on_error and not results.get("valid", True):
+                return 1
+            return 0
+
         # Interactive mode
         if args.interactive:
             run_interactive(reader, args)
