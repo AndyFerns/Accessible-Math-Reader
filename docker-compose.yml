@@ -1,0 +1,39 @@
+# ============================================================================
+# Accessible Math Reader — Docker Compose
+# ============================================================================
+# Quick start:
+#   docker compose up -d
+#
+# View logs:
+#   docker compose logs -f
+#
+# Stop:
+#   docker compose down
+# ============================================================================
+
+services:
+  amr:
+    build: .
+    container_name: amr
+    ports:
+      - "${AMR_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - AMR_LOG_FORMAT=${AMR_LOG_FORMAT:-json}
+      - AMR_LOG_LEVEL=${AMR_LOG_LEVEL:-INFO}
+      - AMR_METRICS=${AMR_METRICS:-true}
+    volumes:
+      - amr-audio:/app/static/audio
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  amr-audio:
+    driver: local
