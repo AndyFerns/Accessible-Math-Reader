@@ -63,6 +63,7 @@ nav:
       - Examples: examples.md
   - API Reference: api.md
   - Architecture: architecture.md
+  - Deployment: deployment.md
   - Contributing: contributing.md
 
 # ---------------------------------------------------------------------------

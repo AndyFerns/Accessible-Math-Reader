@@ -42,6 +42,32 @@ dev = [
 web = [
     "flask>=3.0.0",
 ]
+# ── Infrastructure feature extras (all optional) ─────────────
+api = [
+    "flask>=3.0.0",
+    "gunicorn>=21.2.0; sys_platform != 'win32'",
+]
+grpc = [
+    "grpcio>=1.60.0",
+    "protobuf>=4.25.0",
+    "grpcio-tools>=1.60.0",
+]
+offline-tts = [
+    "pyttsx3>=2.90",
+]
+metrics = [
+    "prometheus_client>=0.19.0",
+]
+tracing = [
+    "opentelemetry-api>=1.22.0",
+    "opentelemetry-sdk>=1.22.0",
+]
+jupyter = [
+    "ipython>=8.0.0",
+]
+all = [
+    "accessible-math-reader[api,offline-tts,metrics,jupyter]",
+]
 
 [project.scripts]
 amr = "accessible_math_reader.cli:main"

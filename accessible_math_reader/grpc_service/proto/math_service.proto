@@ -1,0 +1,89 @@
+// ============================================================================
+// Accessible Math Reader — gRPC Service Definition
+// ============================================================================
+//
+// Language-agnostic interface for math accessibility services.
+// Compile with:
+//   python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. math_service.proto
+//
+// Requires: pip install grpcio-tools
+// ============================================================================
+
+syntax = "proto3";
+
+package amr;
+
+option java_package = "com.amr.grpc";
+option go_package = "github.com/accessible-math-reader/amr/proto";
+
+// --------------------------------------------------------------------------
+// Service
+// --------------------------------------------------------------------------
+
+service MathAccessibility {
+  // Convert a math expression to spoken English text
+  rpc ToSpeech(MathRequest) returns (SpeechResponse);
+
+  // Convert a math expression to Braille notation
+  rpc ToBraille(BrailleRequest) returns (BrailleResponse);
+
+  // Return the semantic AST of a math expression
+  rpc GetStructure(MathRequest) returns (StructureResponse);
+
+  // Synthesise speech and return audio bytes
+  rpc ToAudio(MathRequest) returns (AudioResponse);
+
+  // Run accessibility validation on a math expression
+  rpc Validate(MathRequest) returns (ValidationResponse);
+}
+
+// --------------------------------------------------------------------------
+// Messages
+// --------------------------------------------------------------------------
+
+message MathRequest {
+  string input = 1;           // Math expression (LaTeX, MathML, or plaintext)
+  string format = 2;          // "auto", "latex", "mathml", "plaintext"
+  string verbosity = 3;       // "verbose", "concise", "superbrief"
+}
+
+message BrailleRequest {
+  string input = 1;
+  string format = 2;
+  string notation = 3;        // "nemeth" or "ueb"
+}
+
+message SpeechResponse {
+  string speech = 1;
+  string input = 2;
+}
+
+message BrailleResponse {
+  string braille = 1;
+  string notation = 2;
+  string input = 3;
+}
+
+message StructureResponse {
+  string structure_json = 1;  // Semantic AST as JSON string
+  string input = 2;
+}
+
+message AudioResponse {
+  bytes audio_data = 1;       // MP3 audio bytes
+  string mime_type = 2;       // "audio/mpeg"
+}
+
+message WcagViolation {
+  string rule = 1;
+  string description = 2;
+  string severity = 3;
+}
+
+message ValidationResponse {
+  bool valid = 1;
+  repeated WcagViolation wcag_violations = 2;
+  repeated string missing_semantic_structure = 3;
+  repeated string aria_warnings = 4;
+  string input = 5;
+}
