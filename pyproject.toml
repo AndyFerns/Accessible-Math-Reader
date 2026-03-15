@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
 authors = [
-    {name = "Accessible Math Reader Contributors"}
+    {name = "Andrew Fernandes"}
 ]
 keywords = ["accessibility", "math", "braille", "screen-reader", "mathml", "latex"]
 classifiers = [
@@ -24,7 +24,8 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Accessibility",
+    "Topic :: Text Processing",
+    "Topic :: Education"
 ]
 dependencies = [
     "gtts>=2.5.0",
