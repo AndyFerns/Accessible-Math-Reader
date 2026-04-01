@@ -34,6 +34,8 @@
 
 AMR can be used as a **Python library**, a **CLI tool**, or through a **Flask-based web interface**.
 
+> 🎓 Developed at FCRIT Vashi as a project in academic research in accessibility and inclusive technology.
+
 ---
 
 ## ✨ Features
@@ -53,31 +55,31 @@ AMR can be used as a **Python library**, a **CLI tool**, or through a **Flask-ba
 
 ## 🏗️ Architecture
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        Accessible Math Reader                       │
 ├──────────┬──────────┬───────────────────────────────┬───────────────┤
-│  CLI     │  Web UI  │       Python API (MathReader)  │   Plugins    │
-│  (amr)   │  (Flask) │                               │  (extensible)│
+│  CLI     │  Web UI  │      Python API (MathReader)  │   Plugins     │
+│  (amr)   │  (Flask) │                               │  (extensible) │
 ├──────────┴──────────┴───────────────────────────────┴───────────────┤
 │                        Core Pipeline                                │
-│  ┌──────────┐   ┌──────────────┐   ┌────────────────────────────┐  │
-│  │  Parser  │──▸│ Semantic AST │──▸│        Renderers           │  │
-│  │  LaTeX   │   │ (SemanticNode│   │  ┌─────────┬────────────┐  │  │
-│  │  MathML  │   │  NodeType)   │   │  │ Speech  │  Braille   │  │  │
-│  │ Plaintext│
-│  └──────────┘   └──────┬───────┘   │  │ Engine  │ Nemeth/UEB │  │  │
-│                        │           │  └─────────┴────────────┘  │  │
-│                        ▼           │  ┌─────────┬────────────┐  │  │
-│                  ┌───────────┐     │  │  ARIA   │  Simple    │  │  │
-│                  │ Navigator │     │  │Renderer │  Text      │  │  │
-│                  │ (keyboard │     │  └─────────┴────────────┘  │  │
-│                  │  explore) │     └────────────────────────────┘  │
-│                  └───────────┘                                     │
-├────────────────────────────────────────────────────────────────────┤
-│                        Configuration                               │
-│        Config  ·  SpeechConfig  ·  BrailleConfig  ·  A11yConfig   │
-└────────────────────────────────────────────────────────────────────┘
+│  ┌──────────┐   ┌──────────────┐   ┌────────────────────────────┐   │
+│  │  Parser  │──▸│ Semantic AST │──▸│        Renderers           │   │
+│  │  LaTeX   │   │ (SemanticNode│   │  ┌─────────┬────────────┐  │   │
+│  │  MathML  │   │  NodeType)   │   │  │ Speech  │  Braille   │  │   │
+│  │ Plaintext│   |              |   |  |         |            |  |   |
+│  └──────────┘   └──────┬───────┘   │  │ Engine  │ Nemeth/UEB │  │   │
+│                        │           │  └─────────┴────────────┘  │   │
+│                        ▼           │  ┌─────────┬────────────┐  │   │
+│                  ┌───────────┐     │  │  ARIA   │  Simple    │  │   │
+│                  │ Navigator │     │  │Renderer │  Text      │  │   │
+│                  │ (keyboard │     │  └─────────┴────────────┘  │   │
+│                  │  explore) │     └────────────────────────────┘   │
+│                  └───────────┘                                      │
+├─────────────────────────────────────────────────────────────────────┤
+│                        Configuration                                │
+│        Config  ·  SpeechConfig  ·  BrailleConfig  ·  A11yConfig     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Project Structure
@@ -593,6 +595,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 - [WCAG](https://www.w3.org/WAI/standards-guidelines/wcag/) — Accessibility guidelines
 - [Nemeth Braille Code](https://en.wikipedia.org/wiki/Nemeth_Braille) — Mathematical Braille standard
 - [UEB](https://www.uebonline.org/) — Unified English Braille
+- [FCRIT](https://fcrit.ac.in/) - Fr. Conceicao Rodrigues Institute of Technology
 
 ---
 
