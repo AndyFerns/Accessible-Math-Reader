@@ -3,9 +3,12 @@
 @brief Unified WSGI entry point for production deployment.
 
 @details
-Creates a Flask application that includes both the original web UI
-(from ``app.py``) and the REST API Blueprint.  This is the entry
-point for Gunicorn / Docker deployments.
+Creates a Flask application that includes both the web UI routes and
+the REST API Blueprint.  This is the entry point for Gunicorn / Docker
+deployments.
+
+All conversion logic is delegated to ``accessible_math_reader.reader.MathReader``.
+The legacy ``src/`` directory is no longer used (removed in v0.5.1).
 
 Start with Gunicorn:
 @code{.bash}
@@ -24,14 +27,14 @@ Environment variables:
   AMR_ENABLE_RATE_LIMIT          — enable rate limiting
 
 @author Accessible Math Reader Contributors
-@version 0.2.0
+@version 0.5.1
 """
 
 from __future__ import annotations
 
 import logging
 import os
-import sys
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +45,12 @@ def create_app():
 
     @details
     Creates a Flask app that mounts:
-      - The original web UI at ``/`` (from the root ``app.py``)
+      - The web UI at ``/`` (form-based conversion)
       - The REST API at ``/api/v1/*``
       - Infrastructure routes (``/health``, ``/readiness``, ``/metrics``)
+
+    All math conversion is handled by ``MathReader`` from the
+    ``accessible_math_reader`` package — no legacy ``src/`` imports.
 
     @return Configured Flask application
     """
@@ -66,14 +72,13 @@ def create_app():
         static_folder=static_dir,
     )
 
-    # ── Register the original web UI routes ───────────────────
-    # Import the original app module and replicate its routes
-    # so that the web UI continues to work identically.
-    sys.path.insert(0, project_root)
-
-    from src.latex_parser import parse_math_input, latex_to_braille_simple
-    from src.speech_converter import text_to_speech
-    from src.braille_converter import math_to_braille
+    # ── Shared MathReader instance ────────────────────────────────
+    # Replaces the legacy imports:
+    #   from src.latex_parser import parse_math_input, latex_to_braille_simple
+    #   from src.speech_converter import text_to_speech
+    #   from src.braille_converter import math_to_braille
+    from accessible_math_reader.reader import MathReader
+    reader = MathReader()
 
     # Ensure the audio directory exists
     audio_dir = os.path.join(static_dir, "audio")
@@ -81,35 +86,60 @@ def create_app():
 
     from flask import render_template, request, send_from_directory
 
+    # ── Web UI routes ─────────────────────────────────────────────
+
     @app.route("/")
     def index():
+        """Render the main page with empty inputs on initial load."""
         return render_template("index.html", input_text=None, readable_text=None)
 
     @app.route("/convert", methods=["POST"])
     def convert():
+        """
+        Convert math input via MathReader and re-render the page.
+
+        Pipeline:
+            1. reader.to_speech()  → readable English text
+            2. reader.to_braille() → Nemeth Braille string
+            3. reader.to_audio()   → MP3 file (UUID-named to avoid collisions)
+        """
         math_input = request.form.get("math_input", "")
-        readable_text = parse_math_input(math_input)
-        simple_math_text = latex_to_braille_simple(math_input)
-        braille_text = math_to_braille(simple_math_text)
-        audio_path = text_to_speech(readable_text)
-        audio_file = os.path.basename(audio_path)
+
+        try:
+            readable_text = reader.to_speech(math_input)
+            braille_text = reader.to_braille(math_input, notation="nemeth")
+
+            # UUID filename prevents concurrent request collisions
+            audio_filename = f"{uuid.uuid4().hex}.mp3"
+            audio_path = os.path.join(audio_dir, audio_filename)
+            reader.to_audio(math_input, audio_path)
+        except Exception:
+            logger.exception("Conversion failed for input: %s", math_input)
+            return render_template(
+                "index.html",
+                input_text=math_input,
+                readable_text=None,
+                error_message="Could not convert the expression. Please check your input and try again.",
+            )
+
         return render_template(
             "index.html",
             input_text=math_input,
             readable_text=readable_text,
-            audio_file=audio_file,
+            audio_file=audio_filename,
             braille_text=braille_text,
         )
 
     @app.route("/audio/<path:filename>")
     def serve_audio(filename):
+        """Serve generated audio files from the static/audio directory."""
         return send_from_directory(audio_dir, filename)
 
-    # ── Register the REST API Blueprint ───────────────────────
+    # ── Register the REST API Blueprint ───────────────────────────
     from accessible_math_reader.api import create_api_blueprint
     app.register_blueprint(create_api_blueprint())
 
-    # ── Request size limit ────────────────────────────────────
+    # ── Request size limit ────────────────────────────────────────
     max_size = int(os.environ.get("AMR_MAX_REQUEST_SIZE", 1_048_576))  # 1 MB
     app.config["MAX_CONTENT_LENGTH"] = max_size
 

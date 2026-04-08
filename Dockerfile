@@ -16,7 +16,6 @@ WORKDIR /build
 # Install build dependencies
 COPY pyproject.toml requirements.txt ./
 COPY accessible_math_reader/ accessible_math_reader/
-COPY src/ src/
 COPY templates/ templates/
 COPY static/ static/
 COPY app.py ./

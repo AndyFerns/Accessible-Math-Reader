@@ -89,6 +89,7 @@ accessible-math-reader/
 ├── accessible_math_reader/       # 📦 Installable Python package
 │   ├── __init__.py               #    Public API exports
 │   ├── reader.py                 #    MathReader — high-level unified interface
+│   ├── server.py                 #    WSGI entry point for production deployment
 │   ├── cli.py                    #    CLI entry point (`amr` command)
 │   ├── config.py                 #    Configuration management (env, file, API)
 │   ├── core/                     #    Core parsing & rendering engine
@@ -106,11 +107,7 @@ accessible-math-reader/
 │   │   └── ueb.py                #      Unified English Braille converter
 │   └── plugins/                  #    Plugin system
 │       └── base.py               #      Abstract plugin base classes
-├── app.py                        # 🌐 Flask web application entry point
-├── src/                          #    Legacy web-app helper modules
-│   ├── latex_parser.py           #      Regex-based LaTeX parser (for Flask UI)
-│   ├── braille_converter.py      #      Simple character-level Braille mapper
-│   └── speech_converter.py       #      gTTS wrapper for web UI
+├── app.py                        # 🌐 Flask web application (dev entry point)
 ├── templates/
 │   └── index.html                # 🖥️  Web UI template (dark/light, accessible)
 ├── static/
@@ -124,7 +121,7 @@ accessible-math-reader/
 │   ├── accessibility.md          #    Screen reader, Braille & ARIA guide
 │   ├── configuration.md          #    Configuration reference
 │   └── examples.md               #    Code samples & use cases
-├── output/                       #    Sample Braille output files (.brf)
+├── CHANGELOG.md                  #    Version history and migration notes
 ├── pyproject.toml                #    Package metadata & build config
 ├── requirements.txt              #    Web-app-specific dependencies
 └── LICENSE                       #    MIT License
@@ -320,10 +317,19 @@ The web UI provides a visual, accessible interface built with Flask:
 # Install web dependencies
 pip install -e ".[web]"
 
-# Start the development server
+# Development mode (with auto-reload)
 python app.py
-
 # Open http://localhost:5000
+
+# Production mode (via the unified WSGI server)
+python -m accessible_math_reader.server
+# Open http://localhost:5000
+
+# Production with Gunicorn (Linux/macOS)
+gunicorn "accessible_math_reader.server:create_app()" -b 0.0.0.0:8000
+
+# Production with Waitress (Windows)
+waitress-serve --port=8000 --call accessible_math_reader.server:create_app
 ```
 
 **Web UI Features:**
@@ -508,8 +514,11 @@ ruff check accessible_math_reader/ --fix
 ### Running the Web Server
 
 ```bash
+# Development mode (with auto-reload on http://localhost:5000)
 python app.py
-# Open http://localhost:5000
+
+# Production mode (unified WSGI server on http://localhost:5000)
+python -m accessible_math_reader.server
 ```
 
 ---
@@ -549,8 +558,8 @@ pip install build
 python -m build
 
 # Output will be in dist/
-#   dist/accessible_math_reader-0.1.0.tar.gz
-#   dist/accessible_math_reader-0.1.0-py3-none-any.whl
+#   dist/accessible_math_reader-0.5.1.tar.gz
+#   dist/accessible_math_reader-0.5.1-py3-none-any.whl
 ```
 
 ### Publishing to PyPI
