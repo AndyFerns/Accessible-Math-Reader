@@ -1,0 +1,51 @@
+# ============================================================================
+# GitHub Actions — CI pipeline for Accessible Math Reader
+# ============================================================================
+# Runs on every push/PR to main. Steps:
+#   1. Lint with ruff
+#   2. Run pytest with coverage
+#   3. Upload coverage report as artifact
+# ============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,web,api]"
+
+      - name: Lint with ruff
+        run: ruff check accessible_math_reader/ tests/
+
+      - name: Run tests with coverage
+        run: pytest -v --cov=accessible_math_reader --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage report
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml

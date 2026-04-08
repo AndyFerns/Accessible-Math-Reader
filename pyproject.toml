@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "accessible-math-reader"
-version = "0.5.1"
+version = "0.5.2"
 description = "Screen-reader-first math accessibility toolkit for converting LaTeX/MathML to speech and Braille. Developed under FCRIT Vashi."
 readme = "README.md"
 license = {file = "LICENSE"}

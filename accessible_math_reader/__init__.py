@@ -43,7 +43,7 @@ from accessible_math_reader.braille.ueb import UEBConverter
 from accessible_math_reader.config import Config
 from accessible_math_reader.reader import MathReader
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 __all__ = [
     # Main interface
     "MathReader",
