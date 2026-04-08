@@ -492,7 +492,7 @@ function showAbout() {
  * Show user guide (placeholder)
  */
 function showUserGuide() {
-    alert('User Guide: Coming soon!');
+    window.open('https://accessible-math-reader.readthedocs.io/en/latest/', '_blank');
 }
 
 /**
