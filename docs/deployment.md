@@ -78,9 +78,13 @@ waitress-serve --port=8000 --call accessible_math_reader.server:create_app
 ### Development Mode
 
 ```bash
-python -m accessible_math_reader.server
-# or the original:
+# Quick development server (with auto-reload)
 python app.py
+# Open http://localhost:5000
+
+# Production-ready WSGI server (for local testing)
+python -m accessible_math_reader.server
+# Open http://localhost:5000
 ```
 
 ## Kubernetes Deployment

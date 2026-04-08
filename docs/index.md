@@ -39,7 +39,13 @@ Accessible Math Reader (AMR) is a Python toolkit that bridges the gap between ma
 
     ```bash
     pip install -e ".[web]"
+
+    # Development mode (with auto-reload)
     python app.py
+    # Open http://localhost:5000
+
+    # Production mode
+    python -m accessible_math_reader.server
     # Open http://localhost:5000
     ```
 

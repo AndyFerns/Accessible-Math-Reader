@@ -80,6 +80,7 @@ Input (LaTeX / MathML / Plaintext-Unicode)
 |---|---|
 | `__init__.py` | Public API surface — exports `MathReader`, `MathParser`, `Config`, converters, etc. |
 | `reader.py` | `MathReader` — The unified, high-level API that ties parsing, rendering, and synthesis together. |
+| `server.py` | WSGI application factory — creates a Flask app that mounts both the web UI and the REST API. Used by Gunicorn/Docker for production deployment. |
 | `cli.py` | `amr` CLI — argparse-based command-line tool with interactive and batch modes. |
 | `config.py` | `Config`, `SpeechConfig`, `BrailleConfig`, `AccessibilityConfig` — Dataclass-based configuration with JSON file and env-var loading. |
 
@@ -87,14 +88,13 @@ Input (LaTeX / MathML / Plaintext-Unicode)
 
 | File | Responsibility |
 |---|---|
-| `app.py` | Flask entry point — routes for `/` and `/convert`. |
-| `src/latex_parser.py` | Legacy regex-based LaTeX parser for the web route. |
-| `src/braille_converter.py` | Simple character-level Braille mapper for the web route. |
-| `src/speech_converter.py` | gTTS wrapper for the web route. |
+| `app.py` | Flask development entry point — thin controller that delegates to `MathReader` for all conversions. |
 | `templates/index.html` | Full-featured, accessible web UI. |
 | `static/js/app.js` | Frontend JS — tabs, keyboard shortcuts, theme toggler. |
 | `static/js/clipboard.js` | Multi-format copy-to-clipboard module. |
 | `static/css/style.css` | Responsive stylesheet with dark/light/high-contrast modes. |
+
+> **Note (v0.5.1):** The legacy `src/` directory has been removed. Both `app.py` and `server.py` now use `accessible_math_reader.reader.MathReader` for all math conversion logic. See the [CHANGELOG](../CHANGELOG.md) for migration details.
 
 ## Design Decisions
 
@@ -104,4 +104,4 @@ Input (LaTeX / MathML / Plaintext-Unicode)
 
 3. **Plugin architecture** — Speech rules, Braille notations, and input formats can be extended without modifying core code.
 
-4. **Dual web stacks** — The `src/` directory contains the original Flask helpers (simple regex parser), while `accessible_math_reader/` is the refactored, modular package. The web UI uses `src/` for its routes; the package API uses the `core/` modules.
+4. **Unified architecture** — Both the web UI (`app.py`) and the production WSGI server (`server.py`) delegate to `MathReader` from the `accessible_math_reader` package. There is a single source of truth for all math conversion logic.

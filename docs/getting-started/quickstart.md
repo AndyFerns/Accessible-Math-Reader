@@ -52,8 +52,13 @@ amr --interactive
 ## Web Interface
 
 ```bash
+# Development mode (with auto-reload)
 python app.py
 # Open http://localhost:5000 in your browser
+
+# Production mode (unified WSGI server)
+python -m accessible_math_reader.server
+# Open http://localhost:5000
 ```
 
 Type a LaTeX expression like `\frac{a}{b}`, a plaintext expression like `x² + y²`, or paste math from any document and click **Convert** to see speech, Braille, and accessible HTML output.
