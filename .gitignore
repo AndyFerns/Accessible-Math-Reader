@@ -16,10 +16,13 @@ __pycache__/
 # C extensions
 *.so
 
-# Project specific ignores
+# Project specific ignores — generated output files (local only, never committed)
+static/audio/
 */static/audio/
-static/audio/*.mp3
-static/audio/*.ssml
+*.mp3
+*.ssml
+*.brf
+output/
 
 # Distribution / packaging
 .Python
@@ -50,10 +53,6 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
-
-# Project Specifics
-static/audio/
-*.static/audio/.mp3
 
 # Unit test / coverage reports
 htmlcov/
