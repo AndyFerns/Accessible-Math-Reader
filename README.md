@@ -558,8 +558,8 @@ pip install build
 python -m build
 
 # Output will be in dist/
-#   dist/accessible_math_reader-0.5.1.tar.gz
-#   dist/accessible_math_reader-0.5.1-py3-none-any.whl
+#   dist/accessible_math_reader-0.5.2.tar.gz
+#   dist/accessible_math_reader-0.5.2-py3-none-any.whl
 ```
 
 ### Publishing to PyPI
