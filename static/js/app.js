@@ -119,6 +119,58 @@ function toggleSidebar() {
     announceToScreenReader(`Sidebar ${isCollapsed ? 'collapsed' : 'expanded'}`);
 }
 
+/**
+ * Open a specific sidebar panel
+ * @param {string} panelId - ID of the panel to open
+ */
+function openSidebarPanel(panelId) {
+    // Hide main menu
+    const mainMenu = document.getElementById('sidebar-main-menu');
+    if (mainMenu) {
+        mainMenu.classList.remove('sidebar-panel--active');
+        mainMenu.setAttribute('aria-hidden', 'true');
+    }
+    
+    // Show target panel
+    const targetPanel = document.getElementById(panelId);
+    if (targetPanel) {
+        targetPanel.classList.add('sidebar-panel--active');
+        targetPanel.setAttribute('aria-hidden', 'false');
+        
+        // Set focus to the back button for accessibility
+        const backBtn = targetPanel.querySelector('.sidebar-back-btn');
+        if (backBtn) backBtn.focus();
+        
+        // Uncollapse sidebar if it was collapsed
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('collapsed')) {
+            toggleSidebar();
+        }
+    }
+}
+
+/**
+ * Close all feature panels and return to main menu
+ */
+function closeSidebarPanel() {
+    // Hide all feature panels
+    const panels = document.querySelectorAll('.sidebar-panel:not(#sidebar-main-menu)');
+    panels.forEach(panel => {
+        panel.classList.remove('sidebar-panel--active');
+        panel.setAttribute('aria-hidden', 'true');
+    });
+    
+    // Show main menu
+    const mainMenu = document.getElementById('sidebar-main-menu');
+    if (mainMenu) {
+        mainMenu.classList.add('sidebar-panel--active');
+        mainMenu.setAttribute('aria-hidden', 'false');
+        mainMenu.setAttribute('tabindex', '-1');
+        // Optionally focus the menu container
+        mainMenu.focus();
+    }
+}
+
 // =============================================================================
 // TAB MANAGEMENT
 // =============================================================================

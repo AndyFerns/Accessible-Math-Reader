@@ -445,7 +445,6 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    /* overflow-y: auto; */
 
     transition: width var(--transition-normal), transform var(--transition-normal);
     position: relative;
@@ -453,13 +452,13 @@ body {
     flex-shrink: 0;
 }
 
-/* Collapsed state */
+/* Collapsed state — hide the content wrapper and toggle icon */
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
     overflow: hidden;
 }
 
-.sidebar.collapsed .sidebar__section,
+.sidebar.collapsed .sidebar__content-wrapper,
 .sidebar.collapsed .sidebar__toggle-icon {
     opacity: 0;
     visibility: hidden;
@@ -496,9 +495,121 @@ body {
     transform: rotate(180deg);
 }
 
+/* -----------------------------------------------------------------------------
+   SIDEBAR PANELS (Notion-style Drill-Down)
+   ----------------------------------------------------------------------------- */
+
+.sidebar__content-wrapper {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Base state — hidden */
+.sidebar-panel {
+    display: none;
+    width: 100%;
+    background-color: var(--bg-sidebar);
+    animation: panelFadeIn 0.25s ease;
+}
+
+/* Active state — visible */
+.sidebar-panel.sidebar-panel--active {
+    display: block;
+}
+
+/* Main menu uses flex layout when active */
+#sidebar-main-menu.sidebar-panel--active {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+}
+
+@keyframes panelFadeIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Panel Navigation Buttons */
+.sidebar-nav-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 0.5rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    text-align: left;
+}
+
+.sidebar-nav-btn:hover, .sidebar-nav-btn:focus-visible {
+    background-color: var(--bg-card-hover);
+    outline: none;
+}
+
+.sidebar-nav-btn__icon {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.sidebar-nav-btn__label {
+    flex-grow: 1;
+}
+
+.sidebar-nav-btn__arrow {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    transition: transform var(--transition-fast);
+}
+
+.sidebar-nav-btn:hover .sidebar-nav-btn__arrow {
+    transform: translateX(2px);
+    color: var(--text-primary);
+}
+
+/* Back Button */
+.sidebar-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    text-align: left;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-sidebar);
+    z-index: 5;
+}
+
+.sidebar-back-btn:hover, .sidebar-back-btn:focus-visible {
+    color: var(--text-primary);
+    background-color: var(--bg-card-hover);
+    outline: none;
+}
+
 .sidebar__section {
     padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
     transition: opacity var(--transition-fast);
 }
 
@@ -513,7 +624,7 @@ body {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }

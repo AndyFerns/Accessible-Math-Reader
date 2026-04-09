@@ -27,7 +27,7 @@ Environment variables:
   AMR_ENABLE_RATE_LIMIT          — enable rate limiting
 
 @author Accessible Math Reader Contributors
-@version 0.5.1
+@version 0.5.2
 """
 
 from __future__ import annotations

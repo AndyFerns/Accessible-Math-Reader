@@ -25,8 +25,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Main Stylesheet (Cache busted) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='5') }}">
 
     <!-- MathJax for rendering LaTeX formulas -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -146,153 +146,201 @@
         ============================================================
     -->
     <div class="app-layout">
-        <!-- 
+        <!--
             SIDEBAR - Collapsible panel with features and settings
         -->
         <aside class="sidebar" id="sidebar" aria-label="Sidebar">
             <!-- Sidebar Toggle Button -->
-            <button class="sidebar__toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar"
-                title="Toggle sidebar">
+            <button class="sidebar__toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar" title="Toggle sidebar">
                 <span class="sidebar__toggle-icon">◀</span>
             </button>
 
-            <!-- EXAMPLES SECTION -->
-            <section class="sidebar__section">
-                <h2 class="sidebar__heading">
-                    <span class="sidebar__heading-icon" aria-hidden="true">🔢</span>
-                    Examples
-                </h2>
-                <div class="examples-list">
-                    <!-- 
-                        Comprehensive example covering: fraction, superscript, subscript, 
-                        summation, integral, square root, Greek letters
-                    -->
-                    <button class="example-btn" onclick="insertExample('comprehensive')"
-                        title="Comprehensive example with fractions, exponents, integrals, and Greek letters">
-                        <span class="example-btn__preview">∫ Σ √ π x²</span>
-                        <span class="example-btn__label">Comprehensive</span>
+            <div class="sidebar__content-wrapper">
+                <!-- ==============================================
+                     MAIN MENU PANEL
+                     ============================================== -->
+                <div id="sidebar-main-menu" class="sidebar-panel sidebar-panel--active" role="menu">
+                    <button class="sidebar-nav-btn" onclick="openSidebarPanel('panel-examples')" role="menuitem">
+                        <span class="sidebar-nav-btn__icon" aria-hidden="true">🔢</span>
+                        <span class="sidebar-nav-btn__label">Examples</span>
+                        <span class="sidebar-nav-btn__arrow" aria-hidden="true">▸</span>
                     </button>
-                    <button class="example-btn" onclick="insertExample('fraction')" title="Simple fraction">
-                        <span class="example-btn__preview">a/b</span>
-                        <span class="example-btn__label">Fraction</span>
+                    <button class="sidebar-nav-btn" onclick="openSidebarPanel('panel-history')" role="menuitem">
+                        <span class="sidebar-nav-btn__icon" aria-hidden="true">📋</span>
+                        <span class="sidebar-nav-btn__label">History</span>
+                        <span class="sidebar-nav-btn__arrow" aria-hidden="true">▸</span>
                     </button>
-                    <button class="example-btn" onclick="insertExample('quadratic')" title="Quadratic formula">
-                        <span class="example-btn__preview">x = (-b±√)/2a</span>
-                        <span class="example-btn__label">Quadratic</span>
+                    <button class="sidebar-nav-btn" onclick="openSidebarPanel('panel-tips')" role="menuitem">
+                        <span class="sidebar-nav-btn__icon" aria-hidden="true">💡</span>
+                        <span class="sidebar-nav-btn__label">Quick Tips</span>
+                        <span class="sidebar-nav-btn__arrow" aria-hidden="true">▸</span>
                     </button>
-                    <button class="example-btn" onclick="insertExample('integral')" title="Definite integral">
-                        <span class="example-btn__preview">∫₀^∞</span>
-                        <span class="example-btn__label">Integral</span>
-                    </button>
-                    <button class="example-btn" onclick="insertExample('summation')" title="Summation series">
-                        <span class="example-btn__preview">Σᵢ</span>
-                        <span class="example-btn__label">Summation</span>
-                    </button>
-                    <button class="example-btn" onclick="insertExample('matrix')" title="2x2 Matrix">
-                        <span class="example-btn__preview">[a b; c d]</span>
-                        <span class="example-btn__label">Matrix</span>
-                    </button>
-                    <button class="example-btn" onclick="insertExample('plaintext_pythag')"
-                        title="Plaintext Pythagorean theorem with Unicode superscripts">
-                        <span class="example-btn__preview">x² + y² = z²</span>
-                        <span class="example-btn__label">Plaintext</span>
-                    </button>
-                    <button class="example-btn" onclick="insertExample('plaintext_fraction')"
-                        title="Plaintext fraction using parentheses">
-                        <span class="example-btn__preview">(a+b)/(c-d)</span>
-                        <span class="example-btn__label">Plain Frac</span>
-                    </button>
-                    <button class="example-btn" onclick="insertExample('plaintext_mixed')"
-                        title="Plaintext with sqrt, Unicode Greek, and operators">
-                        <span class="example-btn__preview">sqrt(x²) + π</span>
-                        <span class="example-btn__label">Unicode</span>
+                    <button class="sidebar-nav-btn" onclick="openSidebarPanel('panel-settings')" role="menuitem">
+                        <span class="sidebar-nav-btn__icon" aria-hidden="true">⚙️</span>
+                        <span class="sidebar-nav-btn__label">Quick Settings</span>
+                        <span class="sidebar-nav-btn__arrow" aria-hidden="true">▸</span>
                     </button>
                 </div>
-            </section>
 
-            <!-- HISTORY SECTION -->
-            <section class="sidebar__section">
-                <h2 class="sidebar__heading">
-                    <span class="sidebar__heading-icon" aria-hidden="true">📋</span>
-                    History
-                </h2>
-                <div class="history-list" id="historyList">
-                    <!-- History items populated by JavaScript -->
-                    <p class="history-empty">No recent expressions</p>
+                <!-- ==============================================
+                     EXAMPLES PANEL
+                     ============================================== -->
+                <div id="panel-examples" class="sidebar-panel" aria-hidden="true">
+                    <button class="sidebar-back-btn" onclick="closeSidebarPanel()">
+                        <span aria-hidden="true">←</span> Back
+                    </button>
+                    <section class="sidebar__section">
+                        <h2 class="sidebar__heading">
+                            <span class="sidebar__heading-icon" aria-hidden="true">🔢</span>
+                            Examples
+                        </h2>
+                        <div class="examples-list">
+                            <button class="example-btn" onclick="insertExample('comprehensive')" title="Comprehensive example with fractions, exponents, integrals, and Greek letters">
+                                <span class="example-btn__preview">∫ Σ √ π x²</span>
+                                <span class="example-btn__label">Comprehensive</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('fraction')" title="Simple fraction">
+                                <span class="example-btn__preview">a/b</span>
+                                <span class="example-btn__label">Fraction</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('quadratic')" title="Quadratic formula">
+                                <span class="example-btn__preview">x = (-b±√)/2a</span>
+                                <span class="example-btn__label">Quadratic</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('integral')" title="Definite integral">
+                                <span class="example-btn__preview">∫₀^∞</span>
+                                <span class="example-btn__label">Integral</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('summation')" title="Summation series">
+                                <span class="example-btn__preview">Σᵢ</span>
+                                <span class="example-btn__label">Summation</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('matrix')" title="2x2 Matrix">
+                                <span class="example-btn__preview">[a b; c d]</span>
+                                <span class="example-btn__label">Matrix</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('plaintext_pythag')" title="Plaintext Pythagorean theorem with Unicode superscripts">
+                                <span class="example-btn__preview">x² + y² = z²</span>
+                                <span class="example-btn__label">Plaintext</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('plaintext_fraction')" title="Plaintext fraction using parentheses">
+                                <span class="example-btn__preview">(a+b)/(c-d)</span>
+                                <span class="example-btn__label">Plain Frac</span>
+                            </button>
+                            <button class="example-btn" onclick="insertExample('plaintext_mixed')" title="Plaintext with sqrt, Unicode Greek, and operators">
+                                <span class="example-btn__preview">sqrt(x²) + π</span>
+                                <span class="example-btn__label">Unicode</span>
+                            </button>
+                        </div>
+                    </section>
                 </div>
-            </section>
 
-            <!-- QUICK TIPS SECTION -->
-            <section class="sidebar__section">
-                <h2 class="sidebar__heading">
-                    <span class="sidebar__heading-icon" aria-hidden="true">💡</span>
-                    Quick Tips
-                </h2>
-                <ul class="tips-list">
-                    <li>Plaintext: <code>x² + y² = z²</code></li>
-                    <li>Plaintext: <code>(a+b)/(c-d)</code></li>
-                    <li>Functions: <code>sqrt(x)</code>, <code>sin(x)</code></li>
-                    <li>Unicode: <code>π α β ∑ ∫ ∞ ± ≤ ≥</code></li>
-                    <li>LaTeX: <code>\frac{a}{b}</code></li>
-                    <li>LaTeX: <code>x^2</code>, <code>\sqrt{x}</code></li>
-                    <li>Greek: <code>\alpha, \beta, \pi</code></li>
-                </ul>
-            </section>
+                <!-- ==============================================
+                     HISTORY PANEL
+                     ============================================== -->
+                <div id="panel-history" class="sidebar-panel" aria-hidden="true">
+                    <button class="sidebar-back-btn" onclick="closeSidebarPanel()">
+                        <span aria-hidden="true">←</span> Back
+                    </button>
+                    <section class="sidebar__section">
+                        <h2 class="sidebar__heading">
+                            <span class="sidebar__heading-icon" aria-hidden="true">📋</span>
+                            History
+                        </h2>
+                        <div class="history-list" id="historyList">
+                            <!-- History items populated by JavaScript -->
+                            <p class="history-empty">No recent expressions</p>
+                        </div>
+                    </section>
+                </div>
 
-            <!-- SETTINGS SECTION -->
-            <section class="sidebar__section sidebar__section--settings">
-                <h2 class="sidebar__heading">
-                    <span class="sidebar__heading-icon" aria-hidden="true">⚙️</span>
-                    Quick Settings
-                </h2>
+                <!-- ==============================================
+                     QUICK TIPS PANEL
+                     ============================================== -->
+                <div id="panel-tips" class="sidebar-panel" aria-hidden="true">
+                    <button class="sidebar-back-btn" onclick="closeSidebarPanel()">
+                        <span aria-hidden="true">←</span> Back
+                    </button>
+                    <section class="sidebar__section">
+                        <h2 class="sidebar__heading">
+                            <span class="sidebar__heading-icon" aria-hidden="true">💡</span>
+                            Quick Tips
+                        </h2>
+                        <ul class="tips-list">
+                            <li>Plaintext: <code>x² + y² = z²</code></li>
+                            <li>Plaintext: <code>(a+b)/(c-d)</code></li>
+                            <li>Functions: <code>sqrt(x)</code>, <code>sin(x)</code></li>
+                            <li>Unicode: <code>π α β ∑ ∫ ∞ ± ≤ ≥</code></li>
+                            <li>LaTeX: <code>\frac{a}{b}</code></li>
+                            <li>LaTeX: <code>x^2</code>, <code>\sqrt{x}</code></li>
+                            <li>Greek: <code>\alpha, \beta, \pi</code></li>
+                        </ul>
+                    </section>
+                </div>
 
-                <!-- Braille Notation -->
-                <fieldset class="settings-group">
-                    <legend>Braille Notation</legend>
-                    <label class="radio-option">
-                        <input type="radio" name="braille" value="nemeth" checked>
-                        <span>Nemeth</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="braille" value="ueb">
-                        <span>UEB</span>
-                    </label>
-                </fieldset>
+                <!-- ==============================================
+                     SETTINGS PANEL
+                     ============================================== -->
+                <div id="panel-settings" class="sidebar-panel" aria-hidden="true">
+                    <button class="sidebar-back-btn" onclick="closeSidebarPanel()">
+                        <span aria-hidden="true">←</span> Back
+                    </button>
+                    <section class="sidebar__section sidebar__section--settings">
+                        <h2 class="sidebar__heading">
+                            <span class="sidebar__heading-icon" aria-hidden="true">⚙️</span>
+                            Quick Settings
+                        </h2>
 
-                <!-- Speech Style -->
-                <fieldset class="settings-group">
-                    <legend>Speech Style</legend>
-                    <label class="radio-option">
-                        <input type="radio" name="speech" value="verbose" checked>
-                        <span>Verbose</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="speech" value="concise">
-                        <span>Concise</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="speech" value="superbrief">
-                        <span>Brief</span>
-                    </label>
-                </fieldset>
+                        <!-- Braille Notation -->
+                        <fieldset class="settings-group">
+                            <legend>Braille Notation</legend>
+                            <label class="radio-option">
+                                <input type="radio" name="braille" value="nemeth" checked>
+                                <span>Nemeth</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="braille" value="ueb">
+                                <span>UEB</span>
+                            </label>
+                        </fieldset>
 
-                <!-- Navigation Mode -->
-                <fieldset class="settings-group">
-                    <legend>Navigation Mode</legend>
-                    <label class="radio-option">
-                        <input type="radio" name="navmode" value="browse">
-                        <span>Browse</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="navmode" value="explore" checked>
-                        <span>Explore</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="navmode" value="verbose">
-                        <span>Learning</span>
-                    </label>
-                </fieldset>
-            </section>
+                        <!-- Speech Style -->
+                        <fieldset class="settings-group">
+                            <legend>Speech Style</legend>
+                            <label class="radio-option">
+                                <input type="radio" name="speech" value="verbose" checked>
+                                <span>Verbose</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="speech" value="concise">
+                                <span>Concise</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="speech" value="superbrief">
+                                <span>Brief</span>
+                            </label>
+                        </fieldset>
+
+                        <!-- Navigation Mode -->
+                        <fieldset class="settings-group">
+                            <legend>Navigation Mode</legend>
+                            <label class="radio-option">
+                                <input type="radio" name="navmode" value="browse">
+                                <span>Browse</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="navmode" value="explore" checked>
+                                <span>Explore</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="navmode" value="verbose">
+                                <span>Learning</span>
+                            </label>
+                        </fieldset>
+                    </section>
+                </div>
+
+            </div>
         </aside>
 
         <!-- 
@@ -574,7 +622,7 @@
         JAVASCRIPT - App interactions
         ============================================================
     -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js', v='2') }}"></script>
     <!-- Clipboard Module - Multi-format copy support -->
     <script src="{{ url_for('static', filename='js/clipboard.js') }}"></script>
 </body>

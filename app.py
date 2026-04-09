@@ -15,7 +15,7 @@ BREAKING CHANGE (v0.5.1):
     All business logic now flows through ``accessible_math_reader.reader.MathReader``.
 
 Authors: Accessible Math Reader Contributors
-Version: 0.5.1
+Version: 0.5.2
 """
 
 import logging
