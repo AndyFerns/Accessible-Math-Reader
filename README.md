@@ -1,5 +1,5 @@
+<h1 align="center">♿ Accessible Math Reader</h1>
 <p align="center">
-  <h1 align="center">♿ Accessible Math Reader</h1>
   <p align="center">
     <strong>A screen-reader-first mathematical accessibility toolkit for converting LaTeX, MathML, and plaintext/Unicode math into speech, Braille, and navigable ARIA structures.</strong>
   </p>
@@ -10,6 +10,9 @@
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.9+-green.svg" alt="Python 3.9+"></a>
   <a href="#"><img src="https://img.shields.io/badge/Status-Alpha-orange.svg" alt="Alpha"></a>
   <a href="https://www.w3.org/WAI/standards-guidelines/wcag/"><img src="https://img.shields.io/badge/WCAG-2.2_AA-purple.svg" alt="WCAG 2.2 AA"></a>
+  <a href="https://pypi.org/project/accessible-math-reader/">
+  <img src="https://img.shields.io/pypi/v/accessible-math-reader.svg" alt="PyPI version">
+  </a>
 </p>
 
 <p align="center">
@@ -42,14 +45,14 @@ AMR can be used as a **Python library**, a **CLI tool**, or through a **Flask-ba
 
 | Category | Highlights |
 |---|---|
-| **📖 Multi-Format Input** | Parse LaTeX, MathML, and plaintext/Unicode math expressions with auto-detection |
-| **🔊 Speech Output** | Natural language descriptions with 3 verbosity levels and SSML support |
+| **Multi-Format Input** | Parse LaTeX, MathML, and plaintext/Unicode math expressions with auto-detection |
+| **Speech Output** | Natural language descriptions with 3 verbosity levels and SSML support |
 | **⠿ Braille Support** | Full Nemeth Braille Code and Unified English Braille (UEB) converters |
-| **♿ ARIA Navigation** | Keyboard-accessible, step-by-step expression exploration with 3 navigation modes |
-| **📋 Multi-Format Clipboard** | Copy formulas as LaTeX, accessible text, or Braille from the web UI |
-| **🎨 Accessible Web UI** | Dark/light themes, high-contrast mode, zoom controls, screen-reader optimized |
-| **🔌 Plugin System** | Extensible architecture for custom speech rules, Braille notations, and input formats |
-| **⌨️ CLI Tool** | Full-featured command-line interface with interactive and batch modes |
+| **ARIA Navigation** | Keyboard-accessible, step-by-step expression exploration with 3 navigation modes |
+| **Multi-Format Clipboard** | Copy formulas as LaTeX, accessible text, or Braille from the web UI |
+| **Accessible Web UI** | Dark/light themes, high-contrast mode, zoom controls, screen-reader optimized |
+| **Plugin System** | Extensible architecture for custom speech rules, Braille notations, and input formats |
+| **CLI Tool** | Full-featured command-line interface with interactive and batch modes |
 
 ---
 
@@ -136,6 +139,12 @@ accessible-math-reader/
 Install directly from the repository:
 
 ```bash
+pip install accessible-math-reader
+```
+
+### Developer Installation
+
+```bash
 # Clone the repository
 git clone https://github.com/AndyFerns/Accessible-Math-Reader.git
 cd Accessible-Math-Reader
@@ -162,12 +171,6 @@ pip install -e .
 ```
 
 Core dependencies are just `gtts` and `lxml`.
-
-### From PyPI *(coming soon)*
-
-```bash
-pip install accessible-math-reader
-```
 
 ---
 
@@ -202,7 +205,7 @@ reader.to_audio(r"\frac{a}{b}", "output.mp3")
 ssml = reader.to_ssml(r"\sqrt{x}")
 
 # ── Semantic tree inspection ────────────────────────
-structure = reader.get_structure(r"\frac{a+b}{c}")
+structure = reader.parse(r"\frac{a+b}{c}")
 
 # ── Plaintext / Unicode math ────────────────────────
 speech = reader.to_speech("x² + y² = z²")
